@@ -3,7 +3,6 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
-import PDFDocument from 'pdfkit';
 import * as mysql from 'mysql2/promise';
 
 
@@ -16,14 +15,16 @@ const dbLocalpmsConfig = {
   port: 33069,
 };
 
-// MySQL 연결 설정
-const connection = mysql.createPool({
-	host: 'localhost',
-	user: 'root',
-	password: '1234',
-	database: 'localpms',
-  port: 33069,
-})
+// MySQL 연결 설정 함수
+function createConnection() {
+  return mysql.createPool({
+    host: 'localhost',
+    user: 'root',
+    password: '1234',
+    database: 'localpms',
+    port: 33069,
+  });
+}
 
 
 // 파일 경로 설정
@@ -58,8 +59,8 @@ const pdffilePath = path.join(__dirname, 'schemas.pdf')
 //   }
 // }
 
- // 특정 스키마의 모든 테이블 이름 가져오기
-    async function getTableNames(schemaName: string): Promise<string[]> {
+ // 특정 스키마의 모든 테이블 이름 가져오기 (연결을 외부에서 받음)
+    async function getTableNames(connection: any, schemaName: string): Promise<string[]> {
       try {
         const query = `
           SELECT table_name
@@ -68,16 +69,26 @@ const pdffilePath = path.join(__dirname, 'schemas.pdf')
         `;
         const [result] = await connection.query(query, [schemaName]);
         console.log('Raw table names result:', result);
-        return (result as any[]).map((row:any) => row.table_name);
+        console.log('First row structure:', result[0]);
+        console.log('Available keys in first row:', Object.keys(result[0] || {}));
+        
+        const tableNames = (result as any[]).map((row:any) => {
+          // 여러 가능한 컬럼명을 시도
+          const tableName = row.table_name || row.TABLE_NAME || row.Table_Name;
+          console.log('Row:', row, 'Extracted table name:', tableName);
+          return tableName;
+        });
+        console.log('Processed table names:', tableNames);
+        return tableNames;
       } catch (error) {
         console.error('Error fetching table names:', error);
         throw error;
       }
     }
 
-// 특정 테이블의 컬럼 정보 가져오기
-async function getTableInfo(schemaName: string, tableName: string): Promise<any[]> {
 
+// 특정 테이블의 컬럼 정보 가져오기 (연결을 외부에서 받음)
+async function getTableInfoWithConnection(connection: any, schemaName: string, tableName: string): Promise<any[]> {
   try {
     
     const query = `
@@ -101,8 +112,6 @@ async function getTableInfo(schemaName: string, tableName: string): Promise<any[
           AND c.COLUMN_NAME = kcu.COLUMN_NAME
       WHERE 
           c.TABLE_SCHEMA = ? 
-
-
           AND c.TABLE_NAME = ?  
       ORDER BY 
           c.ORDINAL_POSITION;
@@ -113,6 +122,20 @@ async function getTableInfo(schemaName: string, tableName: string): Promise<any[
   } catch (error) {
     console.error(`Error fetching info for table ${tableName}:`, error);
     throw error;
+  }
+}
+
+// 특정 테이블의 컬럼 정보 가져오기 (기존 함수 - 호환성 유지)
+async function getTableInfo(schemaName: string, tableName: string): Promise<any[]> {
+  const connection = createConnection();
+  try {
+    const tableInfo = await getTableInfoWithConnection(connection, schemaName, tableName);
+    return tableInfo;
+  } catch (error) {
+    console.error(`Error fetching info for table ${tableName}:`, error);
+    throw error;
+  } finally {
+    await connection.end();
   }
 }
 
@@ -146,6 +169,23 @@ function saveOriginSchemasToFile(schemas: string): void {
   console.log('Schemas saved to file:', originFilePath);
 }
 
+// originFilePath 파일 삭제 함수
+function deleteOriginSchemasFile(): void {
+  try {
+    if (fs.existsSync(originFilePath)) {
+      fs.unlinkSync(originFilePath);
+      console.log('Successfully deleted file:', originFilePath);
+      vscode.window.showInformationMessage(`Deleted file: ${originFilePath}`);
+    } else {
+      console.log('File does not exist:', originFilePath);
+      vscode.window.showInformationMessage(`File does not exist: ${originFilePath}`);
+    }
+  } catch (error) {
+    console.error('Error deleting file:', error);
+    vscode.window.showErrorMessage(`Error deleting file: ${error}`);
+  }
+}
+
 
 
 
@@ -164,29 +204,31 @@ function saveOriginSchemasToFile(schemas: string): void {
 // }
 
 
-
+// fetchSchemas 호출 시 바로 호출되는 함수수
 async function fetchAllTablesInfo(schemaName: string) {
   try {
+    // 0. 기존 파일 삭제
+    
     // 1. 테이블 이름 가져오기
-    const tableNames = await getTableNames(schemaName);
+    const connection = createConnection();
+    const tableNames = await getTableNames(connection, schemaName);
     console.log(`Found tables in schema "${schemaName}":`, tableNames);
     
     // 2. 각 테이블의 정보 가져오기
     for (const tableName of tableNames) {
       console.log(`Fetching info for table: ${tableName}`);
-      const tableInfo = await getTableInfo(schemaName, tableName);
+      const tableInfo = await getTableInfoWithConnection(connection, schemaName, tableName);
       console.log(`Info for table "${tableName}":`, tableInfo);
       vscode.window.showInformationMessage(`Info for table "${tableName}": ${JSON.stringify(tableInfo)}`);
+      // 3. 파일에 테이블 이름 저장
       saveOriginSchemasToFile(tableName)
+      // 4. 파일에 테이블 정보 저장
       saveOriginSchemasToFile(`${JSON.stringify(tableInfo)}`);
       fs.appendFileSync(filePath,'\n', 'utf8');
     }
     
   } catch (error) {
     console.error('Error fetching tables info:', error);
-  } finally {
-    // 모든 작업이 완료된 후 연결 종료
-    await connection.end();
   }
 }
 
@@ -194,8 +236,8 @@ async function fetchAllTablesInfo(schemaName: string) {
 /******************************* AImember 통신 *******************************/
 
 
-const repository = [];
-const service = [];
+const repository: string[] = [];
+const service: string[] = [];
 const prompt  : string[] = [];
 const modelCamelSnake = new Map<string, string>();
 const repositoryModelMap = new Map<string, string>();
@@ -219,7 +261,7 @@ function addAIresponseTag(model: string, tag: string) {
 
 
 async function findRepositoryWithString(dirPath: string, searchString: string): Promise<void> {
-  const results = [];
+  const results: string[] = [];
   const files = await fs.promises.readdir(dirPath, { withFileTypes: true });
 
   for (const file of files) {
@@ -250,7 +292,7 @@ async function findRepositoryWithString(dirPath: string, searchString: string): 
 }
 
 async function findServiceWithString(dirPath: string, model: string, searchString: string, length: number): Promise<void> {
-  const results = [];
+  const results: string[] = [];
   const files = await fs.promises.readdir(dirPath, { withFileTypes: true });
   for (const file of files) {
     const fullPath = path.join(dirPath, file.name);
@@ -386,7 +428,7 @@ async function main() {
     findRepositoryWithString(targetDirectory, toCamelCase(targetModel))
     modelCamelSnake.set(targetModel, toCamelCase(targetModel))
     }
-))
+  ))
 
   repository.forEach((fileName, index) => {
     repository[index] = fileName.replace('.java', '');
@@ -456,7 +498,7 @@ async function main() {
     }
 
     // 응답 데이터를 JSON으로 파싱
-    const data = await res.json();
+    const data = await res.json() as { message: string };
 
     // 응답 데이터 사용
     console.log('API Response:', data.message);
@@ -484,7 +526,7 @@ async function main() {
     }
 
     // 응답 데이터를 JSON으로 파싱
-    const data = await res.json();
+    const data = await res.json() as { message: string };
     console.log('API Response:', data.message);
     return data.message;
     // 응답 데이터 사용
@@ -551,8 +593,17 @@ export function activate(context: vscode.ExtensionContext) {
       vscode.commands.registerCommand('visualdbforpms.fetchSchemas', async () => {
         try {
           vscode.window.showInformationMessage('fetchSchemas ran!');
-          if (fs.existsSync(filePath)) {
-            fs.unlinkSync(filePath);
+          
+          // filePath 파일 삭제
+          // if (fs.existsSync(filePath)) {
+          //   fs.unlinkSync(filePath);
+          //   console.log('Deleted file:', filePath);
+          // }
+          
+          // originFilePath 파일 삭제
+          if (fs.existsSync(originFilePath)) {
+            fs.unlinkSync(originFilePath);
+            console.log('Deleted file:', originFilePath);
           }
           const schemas = await fetchAllTablesInfo('localpms');
         } catch (error) {
@@ -610,13 +661,41 @@ export function activate(context: vscode.ExtensionContext) {
       }
       // 웹뷰에 표시할 HTML을 설정합니다.
       const schemaContent = fs.readFileSync(filePath, 'utf-8');
-      const arraySchema = schemaContent.match(/erDiagram[\s\S]*?\}/g)
+      const arraySchema = schemaContent.match(/erDiagram[\s\S]*?\}/g) || [];
       const htmlContent = getHtmlForWebviewSchema(arraySchema, modelCamelSnake, modelAIresMap);
       // Webview에 HTML 콘텐츠 설정
       panel.webview.html = htmlContent;
     }
 	);
 	context.subscriptions.push(dbAIwebview);
+
+  // originFilePath 파일 삭제 명령어
+  const deleteOriginFile = vscode.commands.registerCommand('visualdbforpms.deleteOriginFile', () => {
+    deleteOriginSchemasFile();
+  });
+  context.subscriptions.push(deleteOriginFile);
+
+  // 명령어 체인 실행 예시
+  // const chainCommands = vscode.commands.registerCommand('visualdbforpms.chainCommands', async () => {
+  //   try {
+  //     // 1. Hello World 명령어 실행
+  //     await vscode.commands.executeCommand('visualdbforpms.helloWorld');
+      
+  //     // 2. 잠시 대기
+  //     await new Promise(resolve => setTimeout(resolve, 1000));
+      
+  //     // 3. 파일 삭제 명령어 실행
+  //     await vscode.commands.executeCommand('visualdbforpms.deleteOriginFile');
+      
+  //     // 4. 성공 메시지
+  //     vscode.window.showInformationMessage('명령어 체인 실행 완료!');
+      
+  //     } catch (error) {
+  //       console.error('Error executing command chain:', error);
+  //       vscode.window.showErrorMessage(`명령어 실행 오류: ${error}`);
+  //     }
+  //   });
+  //   context.subscriptions.push(chainCommands);
 }
 
 // This method is called when your extension is deactivated

@@ -13,7 +13,9 @@
     "onCommand:visualdbforpms.helloWorld",
     "onCommand:visualdbforpms.fetchSchemas",
     "onCommand:visualdbforpms.dbAIsummary",
-    "onCommand:visualdbforpms.dbAIwebview"
+    "onCommand:visualdbforpms.dbAIwebview",
+    "onCommand:visualdbforpms.deleteOriginFile",
+    "onCommand:visualdbforpms.chainCommands"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -33,6 +35,14 @@
       {
         "command": "visualdbforpms.dbAIwebview",
         "title": "dbAIwebview"
+      },
+      {
+        "command": "visualdbforpms.deleteOriginFile",
+        "title": "Delete Origin Schemas File"
+      },
+      {
+        "command": "visualdbforpms.chainCommands",
+        "title": "Chain Commands Example"
       }
     ]
   },
