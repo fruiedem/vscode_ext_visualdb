@@ -15,7 +15,8 @@
     "onCommand:visualdbforpms.dbAIsummary",
     "onCommand:visualdbforpms.dbAIwebview",
     "onCommand:visualdbforpms.deleteOriginFile",
-    "onCommand:visualdbforpms.chainCommands"
+    "onCommand:visualdbforpms.chainCommands",
+    "onCommand:visualdbforpms.changeMermaid"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -41,8 +42,20 @@
         "title": "Delete Origin Schemas File"
       },
       {
+        "command": "visualdbforpms.deleteMermaidFile",
+        "title": "Delete Mermaid File"
+      },
+      {
+        "command": "visualdbforpms.getRelationInfo",
+        "title": "Get Relation Info"
+      },
+      {
         "command": "visualdbforpms.chainCommands",
         "title": "Chain Commands Example"
+      },
+      {
+        "command": "visualdbforpms.changeMermaid",
+        "title": "Change Mermaid"
       }
     ]
   },

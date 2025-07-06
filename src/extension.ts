@@ -5,6 +5,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as mysql from 'mysql2/promise';
 
+// 파일 잠금 상태를 추적하는 변수
+let isFileWriting = false;
+let isMermaidFileWriting = false;
 
 // DB 설정 정보
 const dbLocalpmsConfig = {
@@ -30,6 +33,7 @@ function createConnection() {
 // 파일 경로 설정
 const filePath = path.join(__dirname, 'schemas.txt');
 const originFilePath = path.join(__dirname, 'OriginSchemas.txt');
+const mermaidFilePath = path.join(__dirname, 'mermaid.txt');
 const pdffilePath = path.join(__dirname, 'schemas.pdf')
 
 
@@ -92,17 +96,15 @@ async function getTableInfoWithConnection(connection: any, schemaName: string, t
   try {
     
     const query = `
-      SELECT 
-          c.TABLE_NAME AS table_name,
-          c.COLUMN_NAME AS column_name,
-          c.COLUMN_TYPE AS column_type,
-          c.IS_NULLABLE AS is_nullable,
-          c.COLUMN_KEY AS column_key,
+      SELECT
+          c.COLUMN_TYPE AS colType,
+          c.COLUMN_NAME AS colName,
           CASE 
               WHEN c.COLUMN_KEY = 'PRI' THEN 'PK'
               WHEN kcu.REFERENCED_TABLE_NAME IS NOT NULL THEN 'FK'
               ELSE 'None'
-          END AS key_type
+          END AS key_type,
+          c.IS_NULLABLE AS isNull
       FROM 
           information_schema.COLUMNS c
       LEFT JOIN 
@@ -138,35 +140,103 @@ async function getTableInfo(schemaName: string, tableName: string): Promise<any[
     await connection.end();
   }
 }
+async function getRelationInfoWithConnection(connection: any, schemaName: string): Promise<any[]> {
+  try { 
+    const query = `
+      WITH ForeignKeys AS (
+          SELECT 
+              kcu.TABLE_NAME AS child_table,
+              kcu.COLUMN_NAME AS child_column,
+              kcu.REFERENCED_TABLE_NAME AS parent_table,
+              kcu.REFERENCED_COLUMN_NAME AS parent_column
+          FROM 
+              information_schema.KEY_COLUMN_USAGE kcu
+          WHERE 
+              kcu.REFERENCED_TABLE_NAME IS NOT NULL
+      ),
+      UniqueKeys AS (
+          SELECT 
+              tc.TABLE_NAME,
+              kcu.COLUMN_NAME,
+              tc.CONSTRAINT_TYPE
+          FROM 
+              information_schema.TABLE_CONSTRAINTS tc
+          JOIN 
+              information_schema.KEY_COLUMN_USAGE kcu
+              ON tc.CONSTRAINT_NAME = kcu.CONSTRAINT_NAME
+              AND tc.TABLE_SCHEMA = kcu.TABLE_SCHEMA
+          WHERE 
+              tc.CONSTRAINT_TYPE IN ('PRIMARY KEY', 'UNIQUE')
+      )
+      SELECT DISTINCT
+          fk.child_table,
+          fk.parent_table,
+          CASE
+              WHEN uq_child.CONSTRAINT_TYPE = 'UNIQUE' AND uq_parent.CONSTRAINT_TYPE = 'UNIQUE' THEN '1:1'
+              WHEN uq_parent.CONSTRAINT_TYPE = 'UNIQUE' THEN '1:N'
+              ELSE 'N:N'
+          END AS relationship_type
+      FROM 
+          ForeignKeys fk
+      LEFT JOIN 
+          UniqueKeys uq_child
+          ON fk.child_table = uq_child.TABLE_NAME
+          AND fk.child_column = uq_child.COLUMN_NAME
+      LEFT JOIN 
+          UniqueKeys uq_parent
+          ON fk.parent_table = uq_parent.TABLE_NAME
+          AND fk.parent_column = uq_parent.COLUMN_NAME;
 
-// 파일에 스키마 정보를 저장하는 함수
-function saveSchemasToFile(schemas: string): void {
-  // const data = schemas.join('\n'); // 스키마 이름을 줄바꿈으로 구분
-  if (fs.existsSync(filePath)) {
-    // 파일이 이미 존재하면 업데이트
-    console.log('File exists. Updating...');
-    fs.appendFileSync(filePath, schemas + '\n', 'utf8');
-  } else {
-    // 파일이 없으면 새로 생성
-    console.log('File does not exist. Creating new file...');
-    fs.writeFileSync(filePath, schemas + '\n', 'utf8');
+    `     
+    const [rows] = await connection.query(query, [schemaName]);
+    console.log(`Raw relation info for ${schemaName}:`, rows);
+    return rows as any[]; // 관계 정보 배열 반환
+  } catch (error) {
+    console.error(`Error fetching info for Info:`, error);
+    throw error;
   }
-  console.log('Schemas saved to file:', filePath);
 }
 
-// 파일에 스키마 정보를 저장하는 함수
-function saveOriginSchemasToFile(schemas: string): void {
-  // const data = schemas.join('\n'); // 스키마 이름을 줄바꿈으로 구분
-  if (fs.existsSync(originFilePath)) {
-    // 파일이 이미 존재하면 업데이트
-    console.log('File exists. Updating...');
-    fs.appendFileSync(originFilePath, schemas + '\n', 'utf8');
-  } else {
-    // 파일이 없으면 새로 생성
-    console.log('File does not exist. Creating new file...');
-    fs.writeFileSync(originFilePath, schemas + '\n', 'utf8');
+async function getRelationInfo(schemaName: string): Promise<any[]> {
+  const connection = createConnection();
+  try {
+    const RelationInfo = await getRelationInfoWithConnection(connection, schemaName);
+    return RelationInfo;  
+  } catch (error) {
+    console.error(`Error fetching info for Info:`, error);
+    return []; // 에러 시 빈 배열 반환
+  } finally {
+   await connection.end();
   }
-  console.log('Schemas saved to file:', originFilePath);
+}
+
+// 파일에 스키마 정보를 저장하는 함수 (동기화 처리)
+async function saveOriginSchemasToFile(schemas: string): Promise<void> {
+  // 파일 쓰기가 진행 중이면 대기
+  while (isFileWriting) {
+    await new Promise(resolve => setTimeout(resolve, 10));
+  }
+  
+  try {
+    isFileWriting = true; // 파일 쓰기 시작
+    
+    // 파일 쓰기를 동기적으로 처리
+    if (fs.existsSync(originFilePath)) {
+      // 파일이 이미 존재하면 업데이트
+      console.log('File exists. Updating...');
+      fs.appendFileSync(originFilePath, schemas + '\n', 'utf8');
+    } else {
+      // 파일이 없으면 새로 생성
+      console.log('File does not exist. Creating new file...');
+      fs.writeFileSync(originFilePath, schemas + '\n', 'utf8');
+    }
+    console.log('Schemas saved to file:', originFilePath);
+  } catch (error) {
+    console.error('Error saving to file:', error);
+    // 파일 쓰기 실패 시 재시도 로직을 추가할 수 있음
+  } finally {
+    isFileWriting = false; // 파일 쓰기 완료
+  }
 }
 
 // originFilePath 파일 삭제 함수
@@ -183,6 +253,23 @@ function deleteOriginSchemasFile(): void {
   } catch (error) {
     console.error('Error deleting file:', error);
     vscode.window.showErrorMessage(`Error deleting file: ${error}`);
+  }
+}
+
+// mermaidFilePath 파일 읽기 함수
+function readMermaidFile(): string {
+  try {
+    if (fs.existsSync(mermaidFilePath)) {
+      const mermaidContent = fs.readFileSync(mermaidFilePath, 'utf8');
+      console.log('Successfully read mermaid file:', mermaidFilePath);
+      return mermaidContent;
+    } else {
+      console.log('Mermaid file does not exist:', mermaidFilePath);
+      return '';
+    }
+  } catch (error) {
+    console.error('Error reading mermaid file:', error);
+    return '';
   }
 }
 
@@ -214,17 +301,55 @@ async function fetchAllTablesInfo(schemaName: string) {
     const tableNames = await getTableNames(connection, schemaName);
     console.log(`Found tables in schema "${schemaName}":`, tableNames);
     
-    // 2. 각 테이블의 정보 가져오기
-    for (const tableName of tableNames) {
-      console.log(`Fetching info for table: ${tableName}`);
-      const tableInfo = await getTableInfoWithConnection(connection, schemaName, tableName);
-      console.log(`Info for table "${tableName}":`, tableInfo);
-      vscode.window.showInformationMessage(`Info for table "${tableName}": ${JSON.stringify(tableInfo)}`);
-      // 3. 파일에 테이블 이름 저장
-      saveOriginSchemasToFile(tableName)
-      // 4. 파일에 테이블 정보 저장
-      saveOriginSchemasToFile(`${JSON.stringify(tableInfo)}`);
-      fs.appendFileSync(filePath,'\n', 'utf8');
+    // 2. 각 테이블의 정보 가져오기 (배치 병렬 처리)
+    const BATCH_SIZE = 5; // 한 번에 처리할 테이블 수
+    const allResults = [];
+    
+    for (let i = 0; i < tableNames.length; i += BATCH_SIZE) {
+      const batch = tableNames.slice(i, i + BATCH_SIZE);
+      console.log(`Processing batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(tableNames.length / BATCH_SIZE)}`);
+      
+      const batchPromises = batch.map(async (tableName) => {
+        try {
+          console.log(`Fetching info for table: ${tableName}`);
+          const tableInfo = await getTableInfo(schemaName, tableName);
+          console.log(`Info for table "${tableName}":`, tableInfo);
+          vscode.window.showInformationMessage(`Info for table "${tableName}": ${JSON.stringify(tableInfo)}`);
+          
+          // 5. mermaid 코드 변환
+          const tableInfoString = `${tableName}: ${JSON.stringify(tableInfo)}`;
+          await vscode.commands.executeCommand('visualdbforpms.changeMermaid', tableInfoString);
+          
+          return { tableName, tableInfo };
+        } catch (error) {
+          console.error(`Error processing table ${tableName}:`, error);
+          return { tableName, error };
+        }
+      });
+
+      // 배치별로 병렬 처리
+      const batchResults = await Promise.all(batchPromises);
+      allResults.push(...batchResults);
+      
+      // 배치 처리 후 잠시 대기 (데이터베이스 부하 방지)
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    
+    console.log('All tables processed:', allResults.length);
+    
+    // 3. 파일 쓰기와 Mermaid 변환을 순차적으로 처리 (충돌 방지)
+    for (const result of allResults) {
+      if (result.error) continue; // 에러가 있는 경우 스킵
+      
+      // 파일에 테이블 이름 저장
+      await saveOriginSchemasToFile(result.tableName);
+      // 파일에 테이블 정보 저장
+      await saveOriginSchemasToFile(`${JSON.stringify(result.tableInfo)}`);
+      fs.appendFileSync(filePath, '\n', 'utf8');
+      
+      // 4. mermaid 코드 변환 (순차 처리로 충돌 방지)
+      const tableInfoString = `${result.tableName}: ${JSON.stringify(result.tableInfo)}`;
+      await vscode.commands.executeCommand('visualdbforpms.changeMermaid', tableInfoString);
     }
     
   } catch (error) {
@@ -317,29 +442,6 @@ async function findServiceWithString(dirPath: string, model: string, searchStrin
 
 }
 
-
-// 모델코드
-const code = `
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-model ai_answr_eval_record {
-  ai_answr_eval_id    String    @id(map: "ai_answr_eval_record_pk") @db.VarChar(100)
-  ai_chat_qstn_id     String    @db.VarChar(100)
-  ai_answr_eval_score Int
-  crt_party_id        Decimal   @db.Decimal(10, 0)
-  str_date            DateTime  @db.Timestamp(6)
-  mod_date            DateTime? @db.Timestamp(6)
-  ai_qstn_type_code   String?   @db.VarChar(5)
-}
-
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-model ai_chat_mstr {
-  ai_chat_id    String    @id(map: "ai_chat_mstr_pk") @db.VarChar(100)
-  org_party_id  Decimal   @db.Decimal(10, 0)
-  user_party_id Decimal   @db.Decimal(10, 0)
-  str_date      DateTime? @db.Timestamp(6)
-  end_date      DateTime? @db.Timestamp(6)
-}
-`;
 
 const removeCommentLines = (input: string): string => {
   // 문자열을 줄 단위로 분리
@@ -588,7 +690,42 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(helloWorld);
 
 
+  context.subscriptions.push(
+    vscode.commands.registerCommand('visualdbforpms.changeMermaid', async (tableNameInfo: string) => {
+      console.log('changeMermaid')
+      console.log('tableNameInfo:', tableNameInfo);
+      
+      // Mermaid 파일 쓰기가 진행 중이면 대기
+      while (isMermaidFileWriting) {
+        await new Promise(resolve => setTimeout(resolve, 10));
+      }
+      
+      try {
+        isMermaidFileWriting = true; // 파일 쓰기 시작
+        
+        const mermaidCode = await callMermaidApi(tableNameInfo);
+        
+        // 파일 쓰기를 동기적으로 처리 (누적 저장)
+        if (fs.existsSync(mermaidFilePath)) {
+          // 파일이 존재하면 기존 내용에 추가
+          fs.appendFileSync(mermaidFilePath, '\n\n' + mermaidCode, 'utf8');
+        } else {
+          // 파일이 없으면 새로 생성
+          fs.writeFileSync(mermaidFilePath, mermaidCode, 'utf8');
+        }
+        
+        vscode.window.showInformationMessage(`Mermaid 다이어그램 추가됨: ${mermaidFilePath}`);
+      } catch (error) {
+        console.error('Error in changeMermaid:', error);
+        vscode.window.showErrorMessage(`Mermaid 변환 오류: ${error}`);
+      } finally {
+        isMermaidFileWriting = false; // 파일 쓰기 완료
+      }
+    })
+  )
 
+
+  // 테이블 정보 조회 명령어
   context.subscriptions.push(
       vscode.commands.registerCommand('visualdbforpms.fetchSchemas', async () => {
         try {
@@ -604,6 +741,12 @@ export function activate(context: vscode.ExtensionContext) {
           if (fs.existsSync(originFilePath)) {
             fs.unlinkSync(originFilePath);
             console.log('Deleted file:', originFilePath);
+          }
+          
+          // mermaidFilePath 파일 삭제 (새로운 처리 시작)
+          if (fs.existsSync(mermaidFilePath)) {
+            fs.unlinkSync(mermaidFilePath);
+            console.log('Deleted mermaid file:', mermaidFilePath);
           }
           const schemas = await fetchAllTablesInfo('localpms');
         } catch (error) {
@@ -629,6 +772,22 @@ export function activate(context: vscode.ExtensionContext) {
     const modelCamelSnake = new Map<string, string>();
     const modelAIresMap = new Map<string, string[]>();
     
+    // 웹뷰 HTML 콘텐츠 생성 함수
+    const createWebviewContent = () => {
+      try {
+        const schemaContent = fs.readFileSync(filePath, 'utf-8');
+        const arraySchema = schemaContent.match(/erDiagram[\s\S]*?\}/g) || [];
+        
+        // Mermaid 파일 내용 읽기
+        const mermaidContent = readMermaidFile();
+        
+        return getHtmlForWebviewSchema(arraySchema, modelCamelSnake, modelAIresMap, mermaidContent);
+      } catch (error) {
+        console.error('Error creating webview content:', error);
+        return '<html><body><h1>Error loading content</h1></body></html>';
+      }
+    };
+    
 		if(panel) {
       panel.reveal(vscode.ViewColumn.One)
     }
@@ -649,6 +808,12 @@ export function activate(context: vscode.ExtensionContext) {
             case 'startChat':
               console.log('Start chat command received from the webview');
               return;
+            case 'refresh':
+              console.log('Refresh command received from the webview');
+              if (panel) {
+                panel.webview.html = createWebviewContent();
+              }
+              return;
           }
         },
         undefined,
@@ -659,12 +824,8 @@ export function activate(context: vscode.ExtensionContext) {
         panel = undefined;
       });
       }
-      // 웹뷰에 표시할 HTML을 설정합니다.
-      const schemaContent = fs.readFileSync(filePath, 'utf-8');
-      const arraySchema = schemaContent.match(/erDiagram[\s\S]*?\}/g) || [];
-      const htmlContent = getHtmlForWebviewSchema(arraySchema, modelCamelSnake, modelAIresMap);
       // Webview에 HTML 콘텐츠 설정
-      panel.webview.html = htmlContent;
+      panel.webview.html = createWebviewContent();
     }
 	);
 	context.subscriptions.push(dbAIwebview);
@@ -675,33 +836,41 @@ export function activate(context: vscode.ExtensionContext) {
   });
   context.subscriptions.push(deleteOriginFile);
 
-  // 명령어 체인 실행 예시
-  // const chainCommands = vscode.commands.registerCommand('visualdbforpms.chainCommands', async () => {
-  //   try {
-  //     // 1. Hello World 명령어 실행
-  //     await vscode.commands.executeCommand('visualdbforpms.helloWorld');
-      
-  //     // 2. 잠시 대기
-  //     await new Promise(resolve => setTimeout(resolve, 1000));
-      
-  //     // 3. 파일 삭제 명령어 실행
-  //     await vscode.commands.executeCommand('visualdbforpms.deleteOriginFile');
-      
-  //     // 4. 성공 메시지
-  //     vscode.window.showInformationMessage('명령어 체인 실행 완료!');
-      
-  //     } catch (error) {
-  //       console.error('Error executing command chain:', error);
-  //       vscode.window.showErrorMessage(`명령어 실행 오류: ${error}`);
-  //     }
-  //   });
-  //   context.subscriptions.push(chainCommands);
+  // mermaidFilePath 파일 삭제 명령어
+  const deleteMermaidFile = vscode.commands.registerCommand('visualdbforpms.deleteMermaidFile', () => {
+    try {
+      if (fs.existsSync(mermaidFilePath)) {
+        fs.unlinkSync(mermaidFilePath);
+        console.log('Successfully deleted mermaid file:', mermaidFilePath);
+        vscode.window.showInformationMessage(`Deleted mermaid file: ${mermaidFilePath}`);
+      } else {
+        console.log('Mermaid file does not exist:', mermaidFilePath);
+        vscode.window.showInformationMessage(`Mermaid file does not exist: ${mermaidFilePath}`);
+      }
+    } catch (error) {
+      console.error('Error deleting mermaid file:', error);
+      vscode.window.showErrorMessage(`Error deleting mermaid file: ${error}`);
+    }
+  });
+  context.subscriptions.push(deleteMermaidFile);
+
+  const getRelationInfoCommand = vscode.commands.registerCommand('visualdbforpms.getRelationInfo', async () => {
+    try {
+      const relationInfo = await getRelationInfo('localpms');
+      console.log(`Relation info: ${relationInfo}`);
+      vscode.window.showInformationMessage(`Relation info fetched: ${relationInfo.length} relationships found`);
+    } catch (error) {
+      console.error('Error fetching relation info:', error);
+      vscode.window.showErrorMessage(`Error fetching relation info: ${error}`);
+    }
+  });
+  context.subscriptions.push(getRelationInfoCommand);  
 }
 
 // This method is called when your extension is deactivated
 export function deactivate() {}
 
-	function getHtmlForWebviewSchema(schema: string[], modelCamelSnake: Map<string, string>, modelAIresMap: Map<string, string[]>): string {
+	function getHtmlForWebviewSchema(schema: string[], modelCamelSnake: Map<string, string>, modelAIresMap: Map<string, string[]>, mermaidContent: string = ''): string {
 	// const md = require('markdown-it')();
   // const html = md.render(markdown);
   console.log(`modelAIresMap: ${modelAIresMap}`)
@@ -756,6 +925,12 @@ export function deactivate() {}
 					});
 				</script>
 
+        <div style="padding: 10px; background: #f0f0f0; border-bottom: 1px solid #ccc;">
+          <button id="refresh-btn" style="padding: 8px 16px; background: #007acc; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            🔄 새로고침
+          </button>
+          <span id="status" style="margin-left: 10px; color: #666;"></span>
+        </div>
         <div class="container">
         </div>
         <!-- Popup elements -->
@@ -767,7 +942,9 @@ export function deactivate() {}
 
         <script>
           const modelAIresMap = ${modelAIresMapJson}
+          const mermaidContent = \`${mermaidContent}\`;
           console.log('Model AI Res Map:', modelAIresMap['PARTYROLEREL']);
+          console.log('Mermaid Content:', mermaidContent);
           // console.log(${JSON.stringify(schema)})
           let mermaidContainer;
           document.addEventListener('DOMContentLoaded', () => {
@@ -778,7 +955,7 @@ export function deactivate() {}
             }
             const modelRegex = /erDiagram\s+([\w_]+)\s*{/g; // 'model' 키워드 뒤의 단어를 캡처
 
-            // 각 다이어그램 블록을 <div> 요소로 추가
+            // 기존 스키마 다이어그램 추가
             console.log('modelAIresMap : ' + Object.values(${JSON.stringify(modelAIresMap)}));
             ${JSON.stringify(schema)}.forEach((block, index) => {
                 match = modelRegex.exec(block)
@@ -790,6 +967,36 @@ export function deactivate() {}
                 mermaidContainer.appendChild(diagramDiv); // 컨테이너에 추가
                 console.log(diagramDiv)
             });
+
+            // Mermaid 파일 내용 추가 (있는 경우)
+            if (mermaidContent && mermaidContent.trim()) {
+              const mermaidBlocks = mermaidContent.split(/\\n\\s*\\n/).filter(block => block.trim());
+              mermaidBlocks.forEach((block, index) => {
+                if (block.trim()) {
+                  const diagramDiv = document.createElement('div');
+                  diagramDiv.className = 'mermaid';
+                  diagramDiv.textContent = block.trim();
+                  diagramDiv.style.cursor = 'pointer';
+                  diagramDiv.style.marginTop = '20px';
+                  diagramDiv.style.border = '1px solid #ddd';
+                  diagramDiv.style.padding = '10px';
+                  diagramDiv.addEventListener('click', () => showMermaidPopup(block.trim()));
+                  mermaidContainer.appendChild(diagramDiv);
+                  console.log('Added mermaid block:', block.trim());
+                }
+              });
+            } else {
+              // Mermaid 파일이 없을 때 안내 메시지
+              const noMermaidDiv = document.createElement('div');
+              noMermaidDiv.style.padding = '20px';
+              noMermaidDiv.style.textAlign = 'center';
+              noMermaidDiv.style.color = '#666';
+              noMermaidDiv.style.border = '2px dashed #ddd';
+              noMermaidDiv.style.marginTop = '20px';
+              noMermaidDiv.style.borderRadius = '8px';
+              noMermaidDiv.innerHTML = '<h3>📊 Mermaid 다이어그램</h3><p>Mermaid 파일이 없습니다.<br>fetchSchemas 명령어를 실행하여 다이어그램을 생성하세요.</p>';
+              mermaidContainer.appendChild(noMermaidDiv);
+            }
 
             // 팝업 관련 요소
           const popupOverlay = document.getElementById('popup-overlay');
@@ -814,6 +1021,13 @@ export function deactivate() {}
             popup.style.display = 'block';
           }
 
+          // Mermaid 팝업 표시 함수
+          function showMermaidPopup(mermaidCode) {
+            popupContent.innerHTML = \`<h3>Mermaid Diagram Code:</h3><pre style="background: #f5f5f5; padding: 10px; border-radius: 5px; overflow-x: auto;">\${mermaidCode}</pre>\`;
+            popupOverlay.style.display = 'block';
+            popup.style.display = 'block';
+          }
+
           // 팝업 닫기 함수
           function closePopup() {
             popupOverlay.style.display = 'none';
@@ -823,6 +1037,27 @@ export function deactivate() {}
           // 닫기 버튼 및 오버레이 클릭 이벤트 추가
           popupClose.addEventListener('click', closePopup);
           popupOverlay.addEventListener('click', closePopup);
+
+          // 새로고침 버튼 이벤트 추가
+          const refreshBtn = document.getElementById('refresh-btn');
+          const statusSpan = document.getElementById('status');
+          
+          if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => {
+              statusSpan.textContent = '새로고침 중...';
+              // VS Code extension에 새로고침 메시지 전송
+              const vscode = acquireVsCodeApi();
+              vscode.postMessage({ command: 'refresh' });
+              
+              // 1초 후 상태 초기화
+              setTimeout(() => {
+                statusSpan.textContent = '완료!';
+                setTimeout(() => {
+                  statusSpan.textContent = '';
+                }, 2000);
+              }, 1000);
+            });
+          }
 
 
 
@@ -837,7 +1072,7 @@ export function deactivate() {}
 
 
 
-	function getHtmlForWebview(mapData: Map<string, string[]>): string {
+function getHtmlForWebview(mapData: Map<string, string[]>): string {
 	// const md = require('markdown-it')();
   // const html = md.render(markdown);
   const mapDataJson = JSON.stringify(Object.fromEntries(mapData));
