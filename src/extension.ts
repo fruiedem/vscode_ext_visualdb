@@ -101,6 +101,8 @@ async function getTableInfo(schemaName: string, tableName: string): Promise<any[
           AND c.COLUMN_NAME = kcu.COLUMN_NAME
       WHERE 
           c.TABLE_SCHEMA = ? 
+
+
           AND c.TABLE_NAME = ?  
       ORDER BY 
           c.ORDINAL_POSITION;
@@ -189,351 +191,7 @@ async function fetchAllTablesInfo(schemaName: string) {
 }
 
 
-/* VScode 패널  */
-
-var panel: vscode.WebviewPanel | undefined = undefined;
-
-type PanelState = {
-  panel: vscode.WebviewPanel;
-  history: { question: string; answer: string }[];
-  initialPrompt: string;
-  firstRenderSent: boolean;
-};
-
-const activePanels = new Map<string, PanelState>();
-
-
-
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
-
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "visualdb" is now active!');
-
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	const helloWorld = vscode.commands.registerCommand('visualdbforpms.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-    // Display a message box to the user
-    console.log('helloWorld')
-		vscode.window.showInformationMessage('Hello World from visualdb!');
-	});
-
-	context.subscriptions.push(helloWorld);
-
-
-
-  context.subscriptions.push(
-      vscode.commands.registerCommand('visualdbforpms.fetchSchemas', async () => {
-        try {
-          vscode.window.showInformationMessage('fetchSchemas ran!');
-          if (fs.existsSync(filePath)) {
-            fs.unlinkSync(filePath);
-          }
-          const schemas = await fetchAllTablesInfo('localpms');
-        } catch (error) {
-          console.error('Error fetching schemas:', error);
-        }
-      })
-    );
-
-
-
-	const dbAIsummary = vscode.commands.registerCommand('visualdbforpms.dbAIsummary', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('dbAIsummary ran!');
-    main();
-	});
-	context.subscriptions.push(dbAIsummary);
-
-  const dbAIwebview = vscode.commands.registerCommand('visualdbforpms.dbAIwebview', () => {
-    vscode.window.showInformationMessage('dbAIwebview ran!');
-    
-    // modelCamelSnake와 modelAIresMap 변수 초기화
-    const modelCamelSnake = new Map<string, string>();
-    const modelAIresMap = new Map<string, string[]>();
-    
-		if(panel) {
-      panel.reveal(vscode.ViewColumn.One)
-    }
-    else {
-      panel = vscode.window.createWebviewPanel(
-        'chatGpt',
-        'VisualDB',
-        vscode.ViewColumn.Beside, // Editor column to show the new webview panel in.
-        {
-          // 웹뷰에 표시될 내용에 대한 설정입니다.
-          enableScripts: true, // JavaScript를 활성화합니다.
-          retainContextWhenHidden: true, // 웹뷰가 비활성화될 때 상태를 유지합니다.
-        }
-      );
-      panel.webview.onDidReceiveMessage(
-        message => {
-          switch (message.command) {
-            case 'startChat':
-              console.log('Start chat command received from the webview');
-              return;
-          }
-        },
-        undefined,
-        context.subscriptions
-      );
-      // 패널이 닫힐 때 panel 객체를 undefined로 설정합니다.
-      panel.onDidDispose(() => {
-        panel = undefined;
-      });
-      }
-      // 웹뷰에 표시할 HTML을 설정합니다.
-      const schemaContent = fs.readFileSync(filePath, 'utf-8');
-      const arraySchema = schemaContent.match(/erDiagram[\s\S]*?\}/g)
-      const htmlContent = getHtmlForWebviewSchema(arraySchema, modelCamelSnake, modelAIresMap);
-      // Webview에 HTML 콘텐츠 설정
-      panel.webview.html = htmlContent;
-    }
-	);
-	context.subscriptions.push(dbAIwebview);
-}
-
-// This method is called when your extension is deactivated
-export function deactivate() {}
-
-	function getHtmlForWebviewSchema(schema: string[], modelCamelSnake: Map<string, string>, modelAIresMap: Map<string, string[]>): string {
-	// const md = require('markdown-it')();
-  // const html = md.render(markdown);
-  console.log(`modelAIresMap: ${modelAIresMap}`)
-  console.log(`modelAIresMap: ${JSON.stringify(modelAIresMap)}`)
-  const modelAIresMapJson = JSON.stringify(Object.fromEntries(modelAIresMap));  // Map 객체를 JSON 문자열로 변환
-  console.log(`modelAIresMapJson: ${modelAIresMapJson}`)
-		return `
-			<!DOCTYPE html>
-			<html lang="en">
-			<head>
-				<meta charset="UTF-8">
-				<meta name="viewport" content="width=device-width, initial-scale=1.0">
-				<title>ER Diagram</title>
-        <style>
-        .popup {
-          position: fixed;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          background-color: white;
-          border: 1px solid #ccc;
-          padding: 20px;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-          z-index: 1000;
-          display: none;
-        }
-        .popup-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background-color: rgba(0, 0, 0, 0.5);
-          z-index: 999;
-          display: none;
-        }
-        .container {
-          width: 50%;
-          height: 50%;
-        }
-        </style>
-
-
-
-			</head>
-			<body>
-        <script type="module">
-					import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
-          					mermaid.initialize({
-						startOnLoad: true,
-						securityLevel: 'loose', // Strict Mode 비활성화
-					});
-				</script>
-
-        <div class="container">
-        </div>
-        <!-- Popup elements -->
-        <div class="popup-overlay" id="popup-overlay"></div>
-        <div class="popup" id="popup">
-          <p id="popup-content"></p>
-          <button id="popup-close">Close</button>
-        </div>
-
-        <script>
-          const modelAIresMap = ${modelAIresMapJson}
-          console.log('Model AI Res Map:', modelAIresMap['PARTYROLEREL']);
-          // console.log(${JSON.stringify(schema)})
-          let mermaidContainer;
-          document.addEventListener('DOMContentLoaded', () => {
-            mermaidContainer = document.querySelector('.container');
-            if (!mermaidContainer) {
-              console.log('erorrororor')
-              console.error("No <div class='mermaid'> element found in the DOM.");
-            }
-            const modelRegex = /erDiagram\s+([\w_]+)\s*{/g; // 'model' 키워드 뒤의 단어를 캡처
-
-            // 각 다이어그램 블록을 <div> 요소로 추가
-            console.log('modelAIresMap : ' + Object.values(${JSON.stringify(modelAIresMap)}));
-            ${JSON.stringify(schema)}.forEach((block, index) => {
-                match = modelRegex.exec(block)
-                const diagramDiv = document.createElement('div');
-                diagramDiv.className = 'mermaid';
-                diagramDiv.textContent = block.trim(); // 다이어그램 텍스트 추가
-                diagramDiv.style.cursor = 'pointer'
-                diagramDiv.addEventListener('click', () => showPopup(index))
-                mermaidContainer.appendChild(diagramDiv); // 컨테이너에 추가
-                console.log(diagramDiv)
-            });
-
-            // 팝업 관련 요소
-          const popupOverlay = document.getElementById('popup-overlay');
-          const popup = document.getElementById('popup');
-          const popupContent = document.getElementById('popup-content');
-          const popupClose = document.getElementById('popup-close');
-
-          // 팝업 표시 함수
-          function showPopup(index) {
-            popupContent.textContent = \`Aichatmstr,이 코드는 AI 채팅 마스터(AiChatMstr)를 생성하는 기능을 수행합니다. 
-                      주요 기능은 다음과 같습니다:
-             <br>1. 현재 로그인한 사용자의 정보를 확인하여, 조직 파티 ID와 사용자 파티 ID를 설정합니다.
-
-             <br>2. 시작 날짜(strDate)가 제공되지 않으면 현재 시점으로 설정합니다.
-
-             <br>3. 종료 날짜(endDate)는 기본적으로 9999년 12월 31일로 설정됩니다.
-
-             <br>4. AI 채팅 마스터 엔티티를 생성하고 저장합니다.
-
-             <br>5. 생성된 AI 채팅 마스터 데이터를 DTO 형태로 반환합니다.\` || 'No comments available.';
-            popupOverlay.style.display = 'block';
-            popup.style.display = 'block';
-          }
-
-          // 팝업 닫기 함수
-          function closePopup() {
-            popupOverlay.style.display = 'none';
-            popup.style.display = 'none';
-          }
-
-          // 닫기 버튼 및 오버레이 클릭 이벤트 추가
-          popupClose.addEventListener('click', closePopup);
-          popupOverlay.addEventListener('click', closePopup);
-
-
-
-          })
-
-
-        </script>
-			</body>
-			</html>
-		`;
-	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	function getHtmlForWebview(mapData: Map<string, string[]>): string {
-	// const md = require('markdown-it')();
-  // const html = md.render(markdown);
-  const mapDataJson = JSON.stringify(Object.fromEntries(mapData));
-		return `
-			<!DOCTYPE html>
-			<html lang="en">
-			<head>
-				<meta charset="UTF-8">
-				<meta name="viewport" content="width=device-width, initial-scale=1.0">
-				<title>ER Diagram</title>
-			</head>
-			<body>
-        
-        <div>
-        </div>
-        <div id="mapDisplay">
-        </div>
-        <div id="test">
-        </div>
-        <script>
-          const mapData = ${mapDataJson}
-          function formatStringWithNewlines(input) {
-              // 정규식을 사용하여 숫자.로 시작하는 경우 앞에 개행 추가
-            const formattedString = input.replace(/(\d+\.)/g, '\\n$1');
-            return formattedString.trim(); // 문자열 앞뒤 공백 제거
-          }
-
-
-          function displayMapData(mapData) {
-            console.log('hihi')
-            const mapDisplay = document.getElementById('mapDisplay')
-            console.log(mapDisplay)
-            if(!mapDisplay) {
-              console.log('!mapDisplay')
-              return;
-            }
-            for (const key in mapData) {
-              console.log('for문 입장')
-              // 키를 표시
-              console.log('키 표시')
-              const keyElement = document.createElement('div')
-              keyElement.className = 'map-key'
-              keyElement.textContent = key
-
-              // 값(배열)을 표시
-              console.log('값 표시')
-              const valueElement = document.createElement('ul')
-              valueElement.className = 'map-value'
-              mapData[key].forEach(item => {
-                const listItem = document.createElement('li')
-                listItem.textContent = formatStringWithNewlines(item)
-                valueElement.appendChild(listItem)
-              })
-
-              // 키와 값 추가
-              console.log('키와 값 표시')
-              const container = document.createElement('div')
-              container.className='map-container'
-              container.appendChild(keyElement)
-              container.appendChild(valueElement)
-              console.log('최종 appendchild')
-              mapDisplay.appendChild(container)
-              
-            }
-            console.log(mapDisplay)
-          }
-          console.log('hihi2')
-          displayMapData(mapData)
-        </script>
-			</body>
-			</html>
-		`;
-	}
-
-
-
-
-
-/* AImember 통신 */
+/******************************* AImember 통신 *******************************/
 
 
 const repository = [];
@@ -847,3 +505,330 @@ async function main() {
     } 
     return '';
   }
+
+
+
+
+
+  /*******************************  VScode 패널  *******************************/
+
+var panel: vscode.WebviewPanel | undefined = undefined;
+
+type PanelState = {
+  panel: vscode.WebviewPanel;
+  history: { question: string; answer: string }[];
+  initialPrompt: string;
+  firstRenderSent: boolean;
+};
+
+const activePanels = new Map<string, PanelState>();
+
+
+
+// This method is called when your extension is activated
+// Your extension is activated the very first time the command is executed
+export function activate(context: vscode.ExtensionContext) {
+
+	// Use the console to output diagnostic information (console.log) and errors (console.error)
+	// This line of code will only be executed once when your extension is activated
+	console.log('Congratulations, your extension "visualdb" is now active!');
+
+	// The command has been defined in the package.json file
+	// Now provide the implementation of the command with registerCommand
+	// The commandId parameter must match the command field in package.json
+	const helloWorld = vscode.commands.registerCommand('visualdbforpms.helloWorld', () => {
+		// The code you place here will be executed every time your command is executed
+    // Display a message box to the user
+    console.log('helloWorld')
+		vscode.window.showInformationMessage('Hello World from visualdb!');
+	});
+
+	context.subscriptions.push(helloWorld);
+
+
+
+  context.subscriptions.push(
+      vscode.commands.registerCommand('visualdbforpms.fetchSchemas', async () => {
+        try {
+          vscode.window.showInformationMessage('fetchSchemas ran!');
+          if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+          }
+          const schemas = await fetchAllTablesInfo('localpms');
+        } catch (error) {
+          console.error('Error fetching schemas:', error);
+        }
+      })
+    );
+
+
+
+	const dbAIsummary = vscode.commands.registerCommand('visualdbforpms.dbAIsummary', () => {
+		// The code you place here will be executed every time your command is executed
+		// Display a message box to the user
+		vscode.window.showInformationMessage('dbAIsummary ran!');
+    main();
+	});
+	context.subscriptions.push(dbAIsummary);
+
+  const dbAIwebview = vscode.commands.registerCommand('visualdbforpms.dbAIwebview', () => {
+    vscode.window.showInformationMessage('dbAIwebview ran!');
+    
+    // modelCamelSnake와 modelAIresMap 변수 초기화
+    const modelCamelSnake = new Map<string, string>();
+    const modelAIresMap = new Map<string, string[]>();
+    
+		if(panel) {
+      panel.reveal(vscode.ViewColumn.One)
+    }
+    else {
+      panel = vscode.window.createWebviewPanel(
+        'chatGpt',
+        'VisualDB',
+        vscode.ViewColumn.Beside, // Editor column to show the new webview panel in.
+        {
+          // 웹뷰에 표시될 내용에 대한 설정입니다.
+          enableScripts: true, // JavaScript를 활성화합니다.
+          retainContextWhenHidden: true, // 웹뷰가 비활성화될 때 상태를 유지합니다.
+        }
+      );
+      panel.webview.onDidReceiveMessage(
+        message => {
+          switch (message.command) {
+            case 'startChat':
+              console.log('Start chat command received from the webview');
+              return;
+          }
+        },
+        undefined,
+        context.subscriptions
+      );
+      // 패널이 닫힐 때 panel 객체를 undefined로 설정합니다.
+      panel.onDidDispose(() => {
+        panel = undefined;
+      });
+      }
+      // 웹뷰에 표시할 HTML을 설정합니다.
+      const schemaContent = fs.readFileSync(filePath, 'utf-8');
+      const arraySchema = schemaContent.match(/erDiagram[\s\S]*?\}/g)
+      const htmlContent = getHtmlForWebviewSchema(arraySchema, modelCamelSnake, modelAIresMap);
+      // Webview에 HTML 콘텐츠 설정
+      panel.webview.html = htmlContent;
+    }
+	);
+	context.subscriptions.push(dbAIwebview);
+}
+
+// This method is called when your extension is deactivated
+export function deactivate() {}
+
+	function getHtmlForWebviewSchema(schema: string[], modelCamelSnake: Map<string, string>, modelAIresMap: Map<string, string[]>): string {
+	// const md = require('markdown-it')();
+  // const html = md.render(markdown);
+  console.log(`modelAIresMap: ${modelAIresMap}`)
+  console.log(`modelAIresMap: ${JSON.stringify(modelAIresMap)}`)
+  const modelAIresMapJson = JSON.stringify(Object.fromEntries(modelAIresMap));  // Map 객체를 JSON 문자열로 변환
+  console.log(`modelAIresMapJson: ${modelAIresMapJson}`)
+		return `
+			<!DOCTYPE html>
+			<html lang="en">
+			<head>
+				<meta charset="UTF-8">
+				<meta name="viewport" content="width=device-width, initial-scale=1.0">
+				<title>ER Diagram</title>
+        <style>
+        .popup {
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background-color: white;
+          border: 1px solid #ccc;
+          padding: 20px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+          z-index: 1000;
+          display: none;
+        }
+        .popup-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0, 0, 0, 0.5);
+          z-index: 999;
+          display: none;
+        }
+        .container {
+          width: 50%;
+          height: 50%;
+        }
+        </style>
+
+
+
+			</head>
+			<body>
+        <script type="module">
+					import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+          					mermaid.initialize({
+						startOnLoad: true,
+						securityLevel: 'loose', // Strict Mode 비활성화
+					});
+				</script>
+
+        <div class="container">
+        </div>
+        <!-- Popup elements -->
+        <div class="popup-overlay" id="popup-overlay"></div>
+        <div class="popup" id="popup">
+          <p id="popup-content"></p>
+          <button id="popup-close">Close</button>
+        </div>
+
+        <script>
+          const modelAIresMap = ${modelAIresMapJson}
+          console.log('Model AI Res Map:', modelAIresMap['PARTYROLEREL']);
+          // console.log(${JSON.stringify(schema)})
+          let mermaidContainer;
+          document.addEventListener('DOMContentLoaded', () => {
+            mermaidContainer = document.querySelector('.container');
+            if (!mermaidContainer) {
+              console.log('erorrororor')
+              console.error("No <div class='mermaid'> element found in the DOM.");
+            }
+            const modelRegex = /erDiagram\s+([\w_]+)\s*{/g; // 'model' 키워드 뒤의 단어를 캡처
+
+            // 각 다이어그램 블록을 <div> 요소로 추가
+            console.log('modelAIresMap : ' + Object.values(${JSON.stringify(modelAIresMap)}));
+            ${JSON.stringify(schema)}.forEach((block, index) => {
+                match = modelRegex.exec(block)
+                const diagramDiv = document.createElement('div');
+                diagramDiv.className = 'mermaid';
+                diagramDiv.textContent = block.trim(); // 다이어그램 텍스트 추가
+                diagramDiv.style.cursor = 'pointer'
+                diagramDiv.addEventListener('click', () => showPopup(index))
+                mermaidContainer.appendChild(diagramDiv); // 컨테이너에 추가
+                console.log(diagramDiv)
+            });
+
+            // 팝업 관련 요소
+          const popupOverlay = document.getElementById('popup-overlay');
+          const popup = document.getElementById('popup');
+          const popupContent = document.getElementById('popup-content');
+          const popupClose = document.getElementById('popup-close');
+
+          // 팝업 표시 함수
+          function showPopup(index) {
+            popupContent.textContent = \`Aichatmstr,이 코드는 AI 채팅 마스터(AiChatMstr)를 생성하는 기능을 수행합니다. 
+                      주요 기능은 다음과 같습니다:
+             <br>1. 현재 로그인한 사용자의 정보를 확인하여, 조직 파티 ID와 사용자 파티 ID를 설정합니다.
+
+             <br>2. 시작 날짜(strDate)가 제공되지 않으면 현재 시점으로 설정합니다.
+
+             <br>3. 종료 날짜(endDate)는 기본적으로 9999년 12월 31일로 설정됩니다.
+
+             <br>4. AI 채팅 마스터 엔티티를 생성하고 저장합니다.
+
+             <br>5. 생성된 AI 채팅 마스터 데이터를 DTO 형태로 반환합니다.\` || 'No comments available.';
+            popupOverlay.style.display = 'block';
+            popup.style.display = 'block';
+          }
+
+          // 팝업 닫기 함수
+          function closePopup() {
+            popupOverlay.style.display = 'none';
+            popup.style.display = 'none';
+          }
+
+          // 닫기 버튼 및 오버레이 클릭 이벤트 추가
+          popupClose.addEventListener('click', closePopup);
+          popupOverlay.addEventListener('click', closePopup);
+
+
+
+          })
+
+
+        </script>
+			</body>
+			</html>
+		`;
+	}
+
+
+
+	function getHtmlForWebview(mapData: Map<string, string[]>): string {
+	// const md = require('markdown-it')();
+  // const html = md.render(markdown);
+  const mapDataJson = JSON.stringify(Object.fromEntries(mapData));
+		return `
+			<!DOCTYPE html>
+			<html lang="en">
+			<head>
+				<meta charset="UTF-8">
+				<meta name="viewport" content="width=device-width, initial-scale=1.0">
+				<title>ER Diagram</title>
+			</head>
+			<body>
+        
+        <div>
+        </div>
+        <div id="mapDisplay">
+        </div>
+        <div id="test">
+        </div>
+        <script>
+          const mapData = ${mapDataJson}
+          function formatStringWithNewlines(input) {
+              // 정규식을 사용하여 숫자.로 시작하는 경우 앞에 개행 추가
+            const formattedString = input.replace(/(\d+\.)/g, '\\n$1');
+            return formattedString.trim(); // 문자열 앞뒤 공백 제거
+          }
+
+
+          function displayMapData(mapData) {
+            console.log('hihi')
+            const mapDisplay = document.getElementById('mapDisplay')
+            console.log(mapDisplay)
+            if(!mapDisplay) {
+              console.log('!mapDisplay')
+              return;
+            }
+            for (const key in mapData) {
+              console.log('for문 입장')
+              // 키를 표시
+              console.log('키 표시')
+              const keyElement = document.createElement('div')
+              keyElement.className = 'map-key'
+              keyElement.textContent = key
+
+              // 값(배열)을 표시
+              console.log('값 표시')
+              const valueElement = document.createElement('ul')
+              valueElement.className = 'map-value'
+              mapData[key].forEach(item => {
+                const listItem = document.createElement('li')
+                listItem.textContent = formatStringWithNewlines(item)
+                valueElement.appendChild(listItem)
+              })
+
+              // 키와 값 추가
+              console.log('키와 값 표시')
+              const container = document.createElement('div')
+              container.className='map-container'
+              container.appendChild(keyElement)
+              container.appendChild(valueElement)
+              console.log('최종 appendchild')
+              mapDisplay.appendChild(container)
+              
+            }
+            console.log(mapDisplay)
+          }
+          console.log('hihi2')
+          displayMapData(mapData)
+        </script>
+			</body>
+			</html>
+		`;
+	}
