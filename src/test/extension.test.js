@@ -33,51 +33,16 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-const mysql = __importStar(require("mysql2/promise"));
-const path = __importStar(require("path"));
-const schemaFromDb = path.join(__dirname, 'schemaFromDb.txt');
-// MySQL 연결 설정
-const connection = mysql.createPool({
-    host: 'localhost',
-    user: 'root',
-    password: '1234',
-    database: 'localpms',
-    port: 33069,
-});
-// 쿼리 실행 예제
-async function main() {
-    try {
-        const [rows] = await connection.query(`
-          SELECT 
-          column_name, 
-          data_type, 
-          is_nullable,
-          column_key
-          FROM information_schema.columns
-          WHERE 
-          table_schema = ? AND table_name = ?;
-      `, ['localpms', 'pms_button']);
-        console.log(typeof rows);
-        updateDataTypes(rows);
-    }
-    catch (err) {
-        console.error('Error executing query: ', err.message);
-    }
-    finally {
-        await connection.end();
-    }
-}
-// DB 스키마 정보 타입 문자열 정제
-function updateDataTypes(data) {
-    return data.map((item) => {
-        if (item.data_type === "timestamp without time zone") {
-            return { ...item, data_type: "timestamp" };
-        }
-        else if (item.data_type === "character varying") {
-            return { ...item, data_type: "character" };
-        }
-        return item; // 다른 값은 그대로 유지
+const assert = __importStar(require("assert"));
+// You can import and use all API from the 'vscode' module
+// as well as import your extension to test it
+const vscode = __importStar(require("vscode"));
+// import * as myExtension from '../../extension';
+suite('Extension Test Suite', () => {
+    vscode.window.showInformationMessage('Start all tests.');
+    test('Sample test', () => {
+        assert.strictEqual(-1, [1, 2, 3].indexOf(5));
+        assert.strictEqual(-1, [1, 2, 3].indexOf(0));
     });
-}
-main();
-//# sourceMappingURL=test.js.map
+});
+//# sourceMappingURL=extension.test.js.map

@@ -97,14 +97,13 @@ async function getTableInfoWithConnection(connection: any, schemaName: string, t
     
     const query = `
       SELECT
-          c.COLUMN_TYPE AS colType,
-          c.COLUMN_NAME AS colName,
+          c.COLUMN_TYPE AS ct,
+          c.COLUMN_NAME AS cn,
           CASE 
               WHEN c.COLUMN_KEY = 'PRI' THEN 'PK'
               WHEN kcu.REFERENCED_TABLE_NAME IS NOT NULL THEN 'FK'
-              ELSE 'None'
-          END AS key_type,
-          c.IS_NULLABLE AS isNull
+              ELSE ''
+          END AS kt
       FROM 
           information_schema.COLUMNS c
       LEFT JOIN 
@@ -212,31 +211,74 @@ async function getRelationInfo(schemaName: string): Promise<any[]> {
 
 // 파일에 스키마 정보를 저장하는 함수 (동기화 처리)
 async function saveOriginSchemasToFile(schemas: string): Promise<void> {
+  console.log('saveOriginSchemasToFile called with:', schemas);
+  console.log('originFilePath:', originFilePath);
+  
   // 파일 쓰기가 진행 중이면 대기
   while (isFileWriting) {
+    console.log('Waiting for file writing to complete...');
     await new Promise(resolve => setTimeout(resolve, 10));
   }
   
   try {
     isFileWriting = true; // 파일 쓰기 시작
+    console.log('File writing started, isFileWriting:', isFileWriting);
     
     // 파일 쓰기를 동기적으로 처리
     if (fs.existsSync(originFilePath)) {
       // 파일이 이미 존재하면 업데이트
-      console.log('File exists. Updating...');
+      console.log('File exists. Updating... OriginSchemas');
       fs.appendFileSync(originFilePath, schemas + '\n', 'utf8');
     } else {
       // 파일이 없으면 새로 생성
-      console.log('File does not exist. Creating new file...');
+      console.log('File does not exist. Creating new file... OriginSchemas');
       fs.writeFileSync(originFilePath, schemas + '\n', 'utf8');
     }
-    console.log('Schemas saved to file:', originFilePath);
+    console.log('Schemas saved to file OriginSchemas:', originFilePath);
+    console.log('File content after save:', fs.readFileSync(originFilePath, 'utf8'));
   } catch (error) {
     console.error('Error saving to file:', error);
     // 파일 쓰기 실패 시 재시도 로직을 추가할 수 있음
   } finally {
     isFileWriting = false; // 파일 쓰기 완료
+    console.log('File writing completed, isFileWriting:', isFileWriting);
   }
+}
+
+// OriginSchemas.txt 파일을 초기화하는 함수
+function initializeFiles(): void {
+  console.log('initializeOriginSchemasFile called');
+  console.log('originFilePath:', originFilePath);
+  
+  try {
+    if (fs.existsSync(originFilePath)) {
+      fs.unlinkSync(originFilePath);
+      console.log('Deleted existing OriginSchemas.txt file');
+    }
+    // 빈 파일 생성
+    fs.writeFileSync(originFilePath, '', 'utf8');
+    console.log('Initialized OriginSchemas.txt file');
+    console.log('File exists after initialization:', fs.existsSync(originFilePath));
+  } catch (error) {
+    console.error('Error initializing OriginSchemas.txt file:', error);
+  }
+  try {
+    if (fs.existsSync(mermaidFilePath)) {
+      fs.unlinkSync(mermaidFilePath);
+      console.log('Deleted existing mermaid.txt file');
+    }
+    // 빈 파일 생성
+    fs.writeFileSync(mermaidFilePath, '', 'utf8');
+    console.log('Initialized mermaid.txt file');
+    console.log('File exists after initialization:', fs.existsSync(mermaidFilePath));
+  } catch (error) {
+    console.error('Error initializing mermaid.txt file:', error);
+  }
+
+
+
+
+
 }
 
 // originFilePath 파일 삭제 함수
@@ -294,7 +336,8 @@ function readMermaidFile(): string {
 // fetchSchemas 호출 시 바로 호출되는 함수수
 async function fetchAllTablesInfo(schemaName: string) {
   try {
-    // 0. 기존 파일 삭제
+    // 0. 기존 파일 삭제 및 초기화
+    initializeFiles();
     
     // 1. 테이블 이름 가져오기
     const connection = createConnection();
@@ -316,7 +359,7 @@ async function fetchAllTablesInfo(schemaName: string) {
           console.log(`Info for table "${tableName}":`, tableInfo);
           vscode.window.showInformationMessage(`Info for table "${tableName}": ${JSON.stringify(tableInfo)}`);
           
-          // 5. mermaid 코드 변환
+          // 5.테이블 정보 mermaid 코드 변환
           const tableInfoString = `${tableName}: ${JSON.stringify(tableInfo)}`;
           await vscode.commands.executeCommand('visualdbforpms.changeMermaid', tableInfoString);
           
@@ -338,19 +381,33 @@ async function fetchAllTablesInfo(schemaName: string) {
     console.log('All tables processed:', allResults.length);
     
     // 3. 파일 쓰기와 Mermaid 변환을 순차적으로 처리 (충돌 방지)
+    console.log('Starting file writing process...');
+    console.log('Total results to process:', allResults.length);
+    
     for (const result of allResults) {
-      if (result.error) continue; // 에러가 있는 경우 스킵
+      console.log('Processing result:', result);
       
+      if (result.error) {
+        console.log('Skipping result with error:', result.error);
+        continue; // 에러가 있는 경우 스킵
+      }
+      
+      console.log('Saving table name to OriginSchemas:', result.tableName);
       // 파일에 테이블 이름 저장
       await saveOriginSchemasToFile(result.tableName);
+      
+      console.log('Saving table info to OriginSchemas:', result.tableInfo);
       // 파일에 테이블 정보 저장
       await saveOriginSchemasToFile(`${JSON.stringify(result.tableInfo)}`);
+      
       fs.appendFileSync(filePath, '\n', 'utf8');
       
       // 4. mermaid 코드 변환 (순차 처리로 충돌 방지)
       const tableInfoString = `${result.tableName}: ${JSON.stringify(result.tableInfo)}`;
       await vscode.commands.executeCommand('visualdbforpms.changeMermaid', tableInfoString);
     }
+    
+    console.log('File writing process completed.');
     
   } catch (error) {
     console.error('Error fetching tables info:', error);
@@ -610,44 +667,126 @@ async function main() {
   }
 
 
-    async function callMermaidApi(schema: string): Promise<any> {
-    const apiUrl = "https://ai-openapi.lotte.net:32001/api/lottegpt"
-    const token = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJoeXVuamlrLmxlZSIsImlzcyI6ImFpX3BsYXRmb3JtIiwiZ3JvdXAiOiIwMzMxMDAiLCJhdXRob3JpdGllcyI6IlJPTEVfVVNFUl9JRCIsInR5cGUiOiJBQ0NFU1MiLCJleHAiOjM4ODc2MDgwOTZ9.Av3kIIIa2HMlJfx0KUdKwN30xadIfC7AmZXNP2go8PlfqlGA_WpoOGmHqFaYYevr3fYCr17ZP2-Sjk7SDi2gkQ"
-    const res = await fetch(apiUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      },
-      body: JSON.stringify({ query: `아래 테이블 정보를 mermaid 코드로 변환해줘. 언급하지 않은 속성 정보는 제공하지마. ${schema}`, history: "" }),
-      // body: JSON.stringify({ query: "아이멤버가 뭐야", history: "" }),
-    });
+    async function callMermaidApi(schema: string): Promise<string> {
+      console.log('callMermaidApi called with schema:', schema);
+      
+      const apiUrl = "https://ai-openapi.lotte.net:32001/api/lottegpt"
+      const token = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJoeXVuamlrLmxlZSIsImlzcyI6ImFpX3BsYXRmb3JtIiwiZ3JvdXAiOiIwMzMxMDAiLCJhdXRob3JpdGllcyI6IlJPTEVfVVNFUl9JRCIsInR5cGUiOiJBQ0NFU1MiLCJleHAiOjM4ODc2MDgwOTZ9.Av3kIIIa2HMlJfx0KUdKwN30xadIfC7AmZXNP2go8PlfqlGA_WpoOGmHqFaYYevr3fYCr17ZP2-Sjk7SDi2gkQ"
+      
+      const res = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ 
+          query: `아래 테이블 정보를 mermaid 코드로 변환해줘. (추가 요구사항: 언급하지 않은 속성 정보는 제공 불필요, 1.타입 2.속성명 3. PK/FK여부 순으로 작성, 대괄호 아닌 중괄호 사용) ${schema}`, 
+          history: "" 
+        }),
+      });
 
-    if (!res.ok) {
-      throw new Error(`HTTP error! status: ${res.json}`);
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+
+      // 응답 데이터를 JSON으로 파싱
+      const data = await res.json() as { message: string };
+      console.log('Raw API Response:', data.message);
+      
+      return data.message;
     }
 
-    // 응답 데이터를 JSON으로 파싱
-    const data = await res.json() as { message: string };
-    console.log('API Response:', data.message);
-    return data.message;
-    // 응답 데이터 사용
-
-
-
+  /**
+   * mermaidCode에서 ```로 둘러싸인 내부 내용만 추출하는 함수
+   * @param input API 응답 문자열
+   * @returns 추출된 테이블명과 {} 내용만 포함된 코드
+   */
+  function extractMermaidCode(input: string): string {
+    console.log('extractMermaidCode called with input:', input);
+    
+    // ```로 둘러싸인 내용을 찾는 정규식
+    const mermaidRegex = /```(?:mermaid)?\s*([\s\S]*?)```/g;
+    let match;
+    let extractedCode = '';
+    
+    // 모든 매치를 찾아서 첫 번째 것을 사용
+    while ((match = mermaidRegex.exec(input)) !== null) {
+      extractedCode = match[1].trim();
+      console.log('Found mermaid code block:', extractedCode);
+      break; // 첫 번째 매치만 사용
+    }
+    
+    if (!extractedCode) {
+      console.log('No mermaid code block found, returning original input');
+      return input.trim();
+    }
+    
+    // mermaid와 erDiagram 키워드 제거, 테이블명과 {} 내용만 추출
+    const cleanedCode = extractedCode
+      .replace(/^\s*mermaid\s*/gi, '') // mermaid 키워드 제거
+      .replace(/^\s*erDiagram\s*/gi, '') // erDiagram 키워드 제거
+      .replace(/decimal\(\d+,\d+\)/g, 'decimal') // decimal 타입 정리
+      .replace(/\bTABLE\b/g, ' ') // TABLE 키워드 제거
+      .replace(/^\s+|\s+$/g, '') // 앞뒤 공백 제거
+      .trim();
+    
+    console.log('Cleaned mermaid code (table name and content only):', cleanedCode);
+    return cleanedCode;
   }
 
+  // 기존 함수와의 호환성을 위한 별칭
   function extractBeetweenBacktics(input: string): string {
-    const regex = /```([\s\S]*?)```/g;
-    const regexDecimal = /decimal\(\d+,\d+\)/g;
-    const matches = [];
-    let match;
-   
-    if((match = regex.exec(input)) !== null){
-      return match[1].replace(regexDecimal, "decimal").replace(/mermaid/g, '').replace(/TABLE/g, ' ');
-      
-    } 
-    return '';
+    return extractMermaidCode(input);
+  }
+
+  // 테스트용 함수 - mermaid 코드 추출 테스트
+  function testMermaidExtraction(): void {
+    const testInputs = [
+      `"
+\`\`\`mermaid
+erDiagram
+    CHMM_USER_INFO {
+        varchar(255) USER_ID PK
+        varchar(255) USER_EMAIL
+        varchar(14) USER_MOBILE
+        varchar(255) USER_NAME
+        varchar(255) USER_NICK
+        varchar(255) USER_PWD
+        varchar(4000) USER_IMG
+        varchar(4000) USER_MSG
+        varchar(1000) USER_DESC
+        varchar(16) USER_STAT_CD
+        varchar(255) USER_SNSID
+        char(1) ACCOUNT_NON_LOCK
+        varchar(8) ACCOUNT_START_DT
+        varchar(8) ACCOUNT_END_DT
+        varchar(8) PASSWORD_EXPIRE_DT
+        char(1) USE_YN
+        datetime SYS_INSERT_DTM
+        varchar(255) SYS_INSERT_USER_ID
+        datetime SYS_UPDATE_DTM
+        varchar(255) SYS_UPDATE_USER_ID
+        int PASSWORD_LOCK_CNT
+        char(1) EXCEPTION_SEND_YN
+        char(1) LOG_SEND_YN
+        varchar(255) appointment
+        varchar(255) department_id
+        varchar(255) employee_id
+        varchar(255) pms_authority
+        varchar(255) position
+    }
+\`\`\`
+
+위 테이블의 구조를 Mermaid 코드로 표현했습니다. \`USER_ID\`가 기본키(PK)로 설정되어 있고, 외래키(FK)는 명시되어 있지 않습니다. 모든 컬럼의 상세 정보는 제공되지 않았습니다.
+"`
+    ];
+
+    testInputs.forEach((input, index) => {
+      console.log(`Test ${index + 1}:`);
+      console.log('Input:', input);
+      console.log('Output:', extractMermaidCode(input));
+      console.log('---');
+    });
   }
 
 
@@ -703,7 +842,12 @@ export function activate(context: vscode.ExtensionContext) {
       try {
         isMermaidFileWriting = true; // 파일 쓰기 시작
         
-        const mermaidCode = await callMermaidApi(tableNameInfo);
+        const rawMermaidResponse = await callMermaidApi(tableNameInfo);
+        console.log('Raw mermaid API response:', rawMermaidResponse);
+        
+        // ```로 둘러싸인 내용만 추출
+        const mermaidCode = extractMermaidCode(rawMermaidResponse);
+        console.log('Extracted mermaid code:', mermaidCode);
         
         // 파일 쓰기를 동기적으로 처리 (누적 저장)
         if (fs.existsSync(mermaidFilePath)) {
@@ -731,23 +875,6 @@ export function activate(context: vscode.ExtensionContext) {
         try {
           vscode.window.showInformationMessage('fetchSchemas ran!');
           
-          // filePath 파일 삭제
-          // if (fs.existsSync(filePath)) {
-          //   fs.unlinkSync(filePath);
-          //   console.log('Deleted file:', filePath);
-          // }
-          
-          // originFilePath 파일 삭제
-          if (fs.existsSync(originFilePath)) {
-            fs.unlinkSync(originFilePath);
-            console.log('Deleted file:', originFilePath);
-          }
-          
-          // mermaidFilePath 파일 삭제 (새로운 처리 시작)
-          if (fs.existsSync(mermaidFilePath)) {
-            fs.unlinkSync(mermaidFilePath);
-            console.log('Deleted mermaid file:', mermaidFilePath);
-          }
           const schemas = await fetchAllTablesInfo('localpms');
         } catch (error) {
           console.error('Error fetching schemas:', error);
@@ -864,7 +991,15 @@ export function activate(context: vscode.ExtensionContext) {
       vscode.window.showErrorMessage(`Error fetching relation info: ${error}`);
     }
   });
-  context.subscriptions.push(getRelationInfoCommand);  
+  context.subscriptions.push(getRelationInfoCommand);
+
+  // Mermaid 코드 추출 테스트 명령어
+  const testMermaidExtractionCommand = vscode.commands.registerCommand('visualdbforpms.testMermaidExtraction', () => {
+    console.log('Testing mermaid extraction...');
+    testMermaidExtraction();
+    vscode.window.showInformationMessage('Mermaid extraction test completed. Check console for results.');
+  });
+  context.subscriptions.push(testMermaidExtractionCommand);  
 }
 
 // This method is called when your extension is deactivated

@@ -3,6 +3,7 @@
   "displayName": "visualdbforpms",
   "description": "",
   "version": "0.0.1",
+  "type":"commonjs",
   "engines": {
     "vscode": "^1.96.0"
   },
@@ -16,7 +17,8 @@
     "onCommand:visualdbforpms.dbAIwebview",
     "onCommand:visualdbforpms.deleteOriginFile",
     "onCommand:visualdbforpms.chainCommands",
-    "onCommand:visualdbforpms.changeMermaid"
+    "onCommand:visualdbforpms.changeMermaid",
+    "onCommand:visualdbforpms.testMermaidExtraction"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -56,6 +58,10 @@
       {
         "command": "visualdbforpms.changeMermaid",
         "title": "Change Mermaid"
+      },
+      {
+        "command": "visualdbforpms.testMermaidExtraction",
+        "title": "Test Mermaid Extraction"
       }
     ]
   },
