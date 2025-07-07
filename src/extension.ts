@@ -34,6 +34,7 @@ function createConnection() {
 const filePath = path.join(__dirname, 'schemas.txt');
 const originFilePath = path.join(__dirname, 'OriginSchemas.txt');
 const mermaidFilePath = path.join(__dirname, 'mermaid.txt');
+const relationFilePath = path.join(__dirname, 'relations.txt');
 const pdffilePath = path.join(__dirname, 'schemas.pdf')
 
 
@@ -275,10 +276,18 @@ function initializeFiles(): void {
     console.error('Error initializing mermaid.txt file:', error);
   }
 
-
-
-
-
+  try {
+    if (fs.existsSync(relationFilePath)) {
+      fs.unlinkSync(relationFilePath);
+      console.log('Deleted existing relations.txt file');
+    }
+    // 빈 파일 생성
+    fs.writeFileSync(relationFilePath, '', 'utf8');
+    console.log('Initialized relations.txt file');
+    console.log('File exists after initialization:', fs.existsSync(relationFilePath));
+  } catch (error) {
+    console.error('Error initializing relations.txt file:', error);
+  }
 }
 
 // originFilePath 파일 삭제 함수
@@ -315,6 +324,90 @@ function readMermaidFile(): string {
   }
 }
 
+// relationInfo를 파일에 저장하는 함수
+async function saveRelationInfoToFile(relationInfo: any[]): Promise<void> {
+  try {
+    console.log('Saving relation info to file:', relationFilePath);
+    
+    // 관계 정보를 읽기 쉬운 형태로 변환
+    const relationData = relationInfo.map((relation, index) => {
+      return `Relation ${index + 1}:
+  Child Table: ${relation.child_table || 'N/A'}
+  Parent Table: ${relation.parent_table || 'N/A'}
+  Relationship Type: ${relation.relationship_type || 'N/A'}
+`;
+    }).join('\n');
+    
+    // 파일에 저장
+    fs.writeFileSync(relationFilePath, relationData, 'utf8');
+    console.log('Relation info saved successfully to:', relationFilePath);
+    
+    // JSON 형태로도 저장 (추가 파일)
+    const jsonFilePath = path.join(__dirname, 'relations.json');
+    fs.writeFileSync(jsonFilePath, JSON.stringify(relationInfo, null, 2), 'utf8');
+    console.log('Relation info JSON saved to:', jsonFilePath);
+    
+  } catch (error) {
+    console.error('Error saving relation info to file:', error);
+    throw error;
+  }
+}
+
+// AI API 호출 함수
+async function callAIRelationApi(relationBatch: any[]): Promise<string> {
+  try {
+    console.log('callAIapi called with batch size:', relationBatch.length);
+    
+    const apiUrl = "https://ai-openapi.lotte.net:32001/api/chatgpt";
+    const token = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJoeXVuamlrLmxlZSIsImlzcyI6ImFpX3BsYXRmb3JtIiwiZ3JvdXAiOiIwMzMxMDAiLCJhdXRob3JpdGllcyI6IlJPTEVfVVNFUl9JRCIsInR5cGUiOiJBQ0NFU1MiLCJleHAiOjM4ODc2MDgwOTZ9.Av3kIIIa2HMlJfx0KUdKwN30xadIfC7AmZXNP2go8PlfqlGA_WpoOGmHqFaYYevr3fYCr17ZP2-Sjk7SDi2gkQ";
+    
+    const relationData = relationBatch.map((relation, index) => 
+      `${index + 1}. Child Table: ${relation.child_table}, Parent Table: ${relation.parent_table}, Relationship: ${relation.relationship_type}`
+    ).join('\n');
+    
+    const res = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({ 
+        query: `아래 데이터베이스 관계 정보를 분석하여 mermaid erdiagram 코드로 변환:\n\n${relationData}`, 
+        history: "" 
+      }),
+    });
+
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+
+    const data = await res.json() as { message: string };
+    console.log('AI API Response for batch:', data.message);
+    
+    return data.message;
+  } catch (error) {
+    console.error('Error calling AI API:', error);
+    throw error;
+  }
+}
+
+// AI 응답을 파일에 저장하는 함수
+async function saveAIResponseToFile(batchIndex: number, aiResponse: string): Promise<void> {
+  try {
+    const aiResponseFilePath = path.join(__dirname, 'ai_relation_analysis.txt');
+    
+    const content = `=== AI Analysis for Relation Batch ${batchIndex + 1} ===\n\n${aiResponse}\n\n`;
+    
+    // 파일에 추가 (누적 저장)
+    fs.appendFileSync(aiResponseFilePath, content, 'utf8');
+    console.log('AI response saved to:', aiResponseFilePath);
+    
+  } catch (error) {
+    console.error('Error saving AI response to file:', error);
+    throw error;
+  }
+}
+
 
 
 
@@ -345,7 +438,7 @@ async function fetchAllTablesInfo(schemaName: string) {
     console.log(`Found tables in schema "${schemaName}":`, tableNames);
     
     // 2. 각 테이블의 정보 가져오기 (배치 병렬 처리)
-    const BATCH_SIZE = 5; // 한 번에 처리할 테이블 수
+    const BATCH_SIZE = 50; // 한 번에 처리할 테이블 수
     const allResults = [];
     
     for (let i = 0; i < tableNames.length; i += BATCH_SIZE) {
@@ -680,7 +773,7 @@ async function main() {
           "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify({ 
-          query: `아래 테이블 정보를 mermaid 코드로 변환해줘. (추가 요구사항: 언급하지 않은 속성 정보는 제공 불필요, 1.타입 2.속성명 3. PK/FK여부 순으로 작성, 대괄호 아닌 중괄호 사용) ${schema}`, 
+          query: `아래 테이블 정보를 mermaid erdiagram 코드로 변환해줘. (추가 요구사항: 언급하지 않은 속성 정보는 제공 불필요, 1.타입 2.속성명 3. PK/FK여부 순으로 작성, 대괄호 아닌 중괄호 사용) ${schema}`, 
           history: "" 
         }),
       });
@@ -827,7 +920,85 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	context.subscriptions.push(helloWorld);
+  const callAIapi = vscode.commands.registerCommand('visualdbforpms.callAIapi', async () => {
 
+    const apiUrl = "https://ai-openapi.lotte.net:32001/api/chatgpt"
+    const token = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJoeXVuamlrLmxlZSIsImlzcyI6ImFpX3BsYXRmb3JtIiwiZ3JvdXAiOiIwMzMxMDAiLCJhdXRob3JpdGllcyI6IlJPTEVfVVNFUl9JRCIsInR5cGUiOiJBQ0NFU1MiLCJleHAiOjM4ODc2MDgwOTZ9.Av3kIIIa2HMlJfx0KUdKwN30xadIfC7AmZXNP2go8PlfqlGA_WpoOGmHqFaYYevr3fYCr17ZP2-Sjk7SDi2gkQ"
+
+    const relation = `
+      Relation 88:
+  Child Table: chmm_code_info
+  Parent Table: chmm_category_info
+  Relationship Type: N:N
+
+Relation 89:
+  Child Table: pms_quotation_reference_system_customer_information_project
+  Parent Table: pms_quotation_reference_system_customer_information
+  Relationship Type: N:N
+
+Relation 90:
+  Child Table: pms_quotation_reference_system_customer_information_project
+  Parent Table: pms_user
+  Relationship Type: N:N
+
+Relation 91:
+  Child Table: pms_meeting_room
+  Parent Table: pms_user
+  Relationship Type: N:N
+
+Relation 92:
+  Child Table: pms_meeting_room
+  Parent Table: pms_project
+  Relationship Type: N:N
+
+Relation 93:
+  Child Table: pms_role
+  Parent Table: pms_code
+  Relationship Type: N:N
+
+Relation 94:
+  Child Table: pms_role
+  Parent Table: pms_user
+  Relationship Type: N:N
+
+Relation 95:
+  Child Table: pms_comment
+  Parent Table: pms_comment
+  Relationship Type: N:N
+
+Relation 96:
+  Child Table: pms_comment
+  Parent Table: pms_user
+  Relationship Type: N:N
+
+Relation 97:
+  Child Table: pms_comment
+  Parent Table: pms_project
+  Relationship Type: N:N
+    `
+    const res = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        query: `아래 테이블 정보를 mermaid erdiagram 연관 코드로 변환해줘  ${relation}`,
+        history: ""
+      }),
+    });
+
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+
+    // 응답 데이터를 JSON으로 파싱
+    const data = await res.json() as { message: string };
+    console.log('Raw API Response:', data.message);
+
+    return data.message;
+  })
+  context.subscriptions.push(callAIapi);
 
   context.subscriptions.push(
     vscode.commands.registerCommand('visualdbforpms.changeMermaid', async (tableNameInfo: string) => {
@@ -981,11 +1152,115 @@ export function activate(context: vscode.ExtensionContext) {
   });
   context.subscriptions.push(deleteMermaidFile);
 
+  // relationFilePath 파일 삭제 명령어
+  const deleteRelationFile = vscode.commands.registerCommand('visualdbforpms.deleteRelationFile', () => {
+    try {
+      if (fs.existsSync(relationFilePath)) {
+        fs.unlinkSync(relationFilePath);
+        console.log('Successfully deleted relation file:', relationFilePath);
+        vscode.window.showInformationMessage(`Deleted relation file: ${relationFilePath}`);
+      } else {
+        console.log('Relation file does not exist:', relationFilePath);
+        vscode.window.showInformationMessage(`Relation file does not exist: ${relationFilePath}`);
+      }
+      
+      // JSON 파일도 삭제
+      const jsonFilePath = path.join(__dirname, 'relations.json');
+      if (fs.existsSync(jsonFilePath)) {
+        fs.unlinkSync(jsonFilePath);
+        console.log('Successfully deleted relation JSON file:', jsonFilePath);
+        vscode.window.showInformationMessage(`Deleted relation JSON file: ${jsonFilePath}`);
+      }
+    } catch (error) {
+      console.error('Error deleting relation file:', error);
+      vscode.window.showErrorMessage(`Error deleting relation file: ${error}`);
+    }
+  });
+  context.subscriptions.push(deleteRelationFile);
+
+  // AI 분석 파일 삭제 명령어
+  const deleteAIAnalysisFiles = vscode.commands.registerCommand('visualdbforpms.deleteAIAnalysisFiles', () => {
+    try {
+      const aiResponseFilePath = path.join(__dirname, 'ai_relation_analysis.txt');
+      
+      if (fs.existsSync(aiResponseFilePath)) {
+        fs.unlinkSync(aiResponseFilePath);
+        console.log('Successfully deleted AI analysis file:', aiResponseFilePath);
+        vscode.window.showInformationMessage('Deleted AI analysis file: ai_relation_analysis.txt');
+      } else {
+        console.log('AI analysis file does not exist:', aiResponseFilePath);
+        vscode.window.showInformationMessage('AI analysis file does not exist: ai_relation_analysis.txt');
+      }
+    } catch (error) {
+      console.error('Error deleting AI analysis file:', error);
+      vscode.window.showErrorMessage(`Error deleting AI analysis file: ${error}`);
+    }
+  });
+  context.subscriptions.push(deleteAIAnalysisFiles);
+
   const getRelationInfoCommand = vscode.commands.registerCommand('visualdbforpms.getRelationInfo', async () => {
     try {
+      console.log('getRelationInfo ran!')
       const relationInfo = await getRelationInfo('localpms');
       console.log(`Relation info: ${relationInfo}`);
-      vscode.window.showInformationMessage(`Relation info fetched: ${relationInfo.length} relationships found`);
+      
+      // relationInfo를 파일에 저장
+      await saveRelationInfoToFile(relationInfo);
+      
+      // 1. AI 분석 파일 초기화
+      const aiResponseFilePath = path.join(__dirname, 'ai_relation_analysis.txt');
+      if (fs.existsSync(aiResponseFilePath)) {
+        fs.unlinkSync(aiResponseFilePath);
+        console.log('Deleted existing AI analysis file');
+      }
+      // 빈 파일 생성
+      fs.writeFileSync(aiResponseFilePath, '', 'utf8');
+      console.log('Initialized AI analysis file');
+      
+      // 2. JSON 파일에서 관계 데이터 읽기
+      const jsonFilePath = path.join(__dirname, 'relations.json');
+      if (!fs.existsSync(jsonFilePath)) {
+        throw new Error('relations.json file not found');
+      }
+      
+      const relationData = JSON.parse(fs.readFileSync(jsonFilePath, 'utf8'));
+      console.log('Loaded relation data from JSON:', relationData.length, 'relations');
+      
+      // 2. 10개씩 배치로 나누기
+      const BATCH_SIZE = 10;
+      const batches = [];
+      for (let i = 0; i < relationData.length; i += BATCH_SIZE) {
+        batches.push(relationData.slice(i, i + BATCH_SIZE));
+      }
+      
+      console.log(`Processing ${batches.length} batches of ${BATCH_SIZE} relations each`);
+      
+      // 3. 각 배치에 대해 AI API 호출
+      for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+        const batch = batches[batchIndex];
+        console.log(`Processing batch ${batchIndex + 1}/${batches.length} with ${batch.length} relations`);
+        
+        try {
+          // AI API 호출
+          const aiResponse = await callAIRelationApi(batch);
+          
+          // AI 응답을 파일에 저장
+          await saveAIResponseToFile(batchIndex, aiResponse);
+          
+          console.log(`Batch ${batchIndex + 1} processed successfully`);
+          
+          // 배치 간 대기 (API 부하 방지)
+          if (batchIndex < batches.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+          
+        } catch (error) {
+          console.error(`Error processing batch ${batchIndex + 1}:`, error);
+          // 에러가 있어도 다음 배치 계속 처리
+        }
+      }
+      
+      vscode.window.showInformationMessage(`Relation info processed: ${relationInfo.length} relationships, ${batches.length} batches analyzed`);
     } catch (error) {
       console.error('Error fetching relation info:', error);
       vscode.window.showErrorMessage(`Error fetching relation info: ${error}`);

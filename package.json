@@ -18,7 +18,9 @@
     "onCommand:visualdbforpms.deleteOriginFile",
     "onCommand:visualdbforpms.chainCommands",
     "onCommand:visualdbforpms.changeMermaid",
-    "onCommand:visualdbforpms.testMermaidExtraction"
+    "onCommand:visualdbforpms.testMermaidExtraction",
+    "onCommand:visualdbforpms.deleteRelationFile",
+    "onCommand:visualdbforpms.deleteAIAnalysisFiles"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -62,6 +64,18 @@
       {
         "command": "visualdbforpms.testMermaidExtraction",
         "title": "Test Mermaid Extraction"
+      },
+      {
+        "command": "visualdbforpms.deleteRelationFile",
+        "title": "Delete Relation File"
+      },
+      {
+        "command": "visualdbforpms.deleteAIAnalysisFiles",
+        "title": "Delete AI Analysis Files"
+      },
+      {
+        "command": "visualdbforpms.callAIapi",
+        "title": "Call AI API"
       }
     ]
   },
