@@ -773,7 +773,7 @@ async function main() {
           "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify({ 
-          query: `아래 테이블 정보를 mermaid erdiagram 코드로 변환해줘. (추가 요구사항: 언급하지 않은 속성 정보는 제공 불필요, 1.타입 2.속성명 3. PK/FK여부 순으로 작성, 대괄호 아닌 중괄호 사용) ${schema}`, 
+          query: `아래 테이블 정보를 mermaid erdiagram 코드로 변환해줘. (추가 요구사항: 모두 대문자로 표기, 언급하지 않은 속성 정보는 제공 불필요, 1.타입 2.속성명 3. PK/FK여부 순으로 작성, 대괄호 아닌 중괄호 사용) ${schema}`, 
           history: "" 
         }),
       });
@@ -827,12 +827,42 @@ async function main() {
     return cleanedCode;
   }
 
+  /**
+   * mermaidCode에서 테이블명을 대문자로 치환하는 함수
+   * @param mermaidCode "xxxx { }" 형태의 mermaid 코드
+   * @returns 테이블명이 대문자로 변환된 코드
+   */
+  function convertTableNameToUpperCase(mermaidCode: string): string {
+    console.log('convertTableNameToUpperCase called with:', mermaidCode);
+    
+    // "테이블명 { }" 형태를 찾는 정규식
+    const tableNameRegex = /^([a-zA-Z_][a-zA-Z0-9_]*)\s*\{/;
+    const match = mermaidCode.match(tableNameRegex);
+    
+    if (match) {
+      const originalTableName = match[1];
+      const upperCaseTableName = originalTableName.toUpperCase();
+      
+      // 테이블명을 대문자로 치환
+      const convertedCode = mermaidCode.replace(originalTableName, upperCaseTableName);
+      
+      console.log('Original table name:', originalTableName);
+      console.log('Converted table name:', upperCaseTableName);
+      console.log('Converted mermaid code:', convertedCode);
+      
+      return convertedCode;
+    } else {
+      console.log('No table name pattern found, returning original code');
+      return mermaidCode;
+    }
+  }
+
   // 기존 함수와의 호환성을 위한 별칭
   function extractBeetweenBacktics(input: string): string {
     return extractMermaidCode(input);
   }
 
-  // 테스트용 함수 - mermaid 코드 추출 테스트
+  // 테스트용 함수 - mermaid 코드 추출 및 테이블명 대문자 변환 테스트
   function testMermaidExtraction(): void {
     const testInputs = [
       `"
@@ -877,7 +907,12 @@ erDiagram
     testInputs.forEach((input, index) => {
       console.log(`Test ${index + 1}:`);
       console.log('Input:', input);
-      console.log('Output:', extractMermaidCode(input));
+      
+      const extractedCode = extractMermaidCode(input);
+      console.log('Extracted code:', extractedCode);
+      
+      const convertedCode = convertTableNameToUpperCase(extractedCode);
+      console.log('Converted code:', convertedCode);
       console.log('---');
     });
   }
@@ -1017,8 +1052,12 @@ Relation 97:
         console.log('Raw mermaid API response:', rawMermaidResponse);
         
         // ```로 둘러싸인 내용만 추출
-        const mermaidCode = extractMermaidCode(rawMermaidResponse);
-        console.log('Extracted mermaid code:', mermaidCode);
+        const extractedMermaidCode = extractMermaidCode(rawMermaidResponse);
+        console.log('Extracted mermaid code:', extractedMermaidCode);
+        
+        // 테이블명을 대문자로 변환
+        const mermaidCode = convertTableNameToUpperCase(extractedMermaidCode);
+        console.log('Final mermaid code with uppercase table name:', mermaidCode);
         
         // 파일 쓰기를 동기적으로 처리 (누적 저장)
         if (fs.existsSync(mermaidFilePath)) {
