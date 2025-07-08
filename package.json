@@ -19,6 +19,7 @@
     "onCommand:visualdbforpms.chainCommands",
     "onCommand:visualdbforpms.changeMermaid",
     "onCommand:visualdbforpms.testMermaidExtraction",
+    "onCommand:visualdbforpms.testRelationLineExtraction",
     "onCommand:visualdbforpms.deleteRelationFile",
     "onCommand:visualdbforpms.deleteAIAnalysisFiles"
   ],
@@ -64,6 +65,10 @@
       {
         "command": "visualdbforpms.testMermaidExtraction",
         "title": "Test Mermaid Extraction"
+      },
+      {
+        "command": "visualdbforpms.testRelationLineExtraction",
+        "title": "Test Relation Line Extraction"
       },
       {
         "command": "visualdbforpms.deleteRelationFile",

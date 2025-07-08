@@ -250,19 +250,7 @@ async function saveOriginSchemasToFile(schemas: string): Promise<void> {
 function initializeFiles(): void {
   console.log('initializeOriginSchemasFile called');
   console.log('originFilePath:', originFilePath);
-  
-  try {
-    if (fs.existsSync(originFilePath)) {
-      fs.unlinkSync(originFilePath);
-      console.log('Deleted existing OriginSchemas.txt file');
-    }
-    // 빈 파일 생성
-    fs.writeFileSync(originFilePath, '', 'utf8');
-    console.log('Initialized OriginSchemas.txt file');
-    console.log('File exists after initialization:', fs.existsSync(originFilePath));
-  } catch (error) {
-    console.error('Error initializing OriginSchemas.txt file:', error);
-  }
+
   try {
     if (fs.existsSync(mermaidFilePath)) {
       fs.unlinkSync(mermaidFilePath);
@@ -270,6 +258,7 @@ function initializeFiles(): void {
     }
     // 빈 파일 생성
     fs.writeFileSync(mermaidFilePath, '', 'utf8');
+    fs.appendFileSync(mermaidFilePath, 'erDiagram\n', 'utf8');
     console.log('Initialized mermaid.txt file');
     console.log('File exists after initialization:', fs.existsSync(mermaidFilePath));
   } catch (error) {
@@ -394,13 +383,13 @@ async function callAIRelationApi(relationBatch: any[]): Promise<string> {
 // AI 응답을 파일에 저장하는 함수
 async function saveAIResponseToFile(batchIndex: number, aiResponse: string): Promise<void> {
   try {
-    const aiResponseFilePath = path.join(__dirname, 'ai_relation_analysis.txt');
+    // const aiResponseFilePath = path.join(__dirname, 'ai_relation_analysis.txt');
     
-    const content = `=== AI Analysis for Relation Batch ${batchIndex + 1} ===\n\n${aiResponse}\n\n`;
+    const content = `\n${aiResponse}\n`;
     
     // 파일에 추가 (누적 저장)
-    fs.appendFileSync(aiResponseFilePath, content, 'utf8');
-    console.log('AI response saved to:', aiResponseFilePath);
+    fs.appendFileSync(mermaidFilePath, content, 'utf8');
+    console.log('AI response saved to:', mermaidFilePath);
     
   } catch (error) {
     console.error('Error saving AI response to file:', error);
@@ -427,6 +416,11 @@ async function saveAIResponseToFile(batchIndex: number, aiResponse: string): Pro
 
 
 // fetchSchemas 호출 시 바로 호출되는 함수수
+// '+' 문자를 제거하는 헬퍼 함수
+function removePlusSigns(input: string): string {
+  return input.replace(/\+/g, '');
+}
+
 async function fetchAllTablesInfo(schemaName: string) {
   try {
     // 0. 기존 파일 삭제 및 초기화
@@ -455,7 +449,7 @@ async function fetchAllTablesInfo(schemaName: string) {
           // 5.테이블 정보 mermaid 코드 변환
           const tableInfoString = `${tableName}: ${JSON.stringify(tableInfo)}`;
           await vscode.commands.executeCommand('visualdbforpms.changeMermaid', tableInfoString);
-          
+          await vscode.commands.executeCommand('visualdbforpms.getRelationInfo');
           return { tableName, tableInfo };
         } catch (error) {
           console.error(`Error processing table ${tableName}:`, error);
@@ -490,13 +484,14 @@ async function fetchAllTablesInfo(schemaName: string) {
       await saveOriginSchemasToFile(result.tableName);
       
       console.log('Saving table info to OriginSchemas:', result.tableInfo);
-      // 파일에 테이블 정보 저장
-      await saveOriginSchemasToFile(`${JSON.stringify(result.tableInfo)}`);
+      // 파일에 테이블 정보 저장 (+ 문자 제거)
+      const cleanedTableInfo = removePlusSigns(JSON.stringify(result.tableInfo));
+      await saveOriginSchemasToFile(cleanedTableInfo);
       
       fs.appendFileSync(filePath, '\n', 'utf8');
       
-      // 4. mermaid 코드 변환 (순차 처리로 충돌 방지)
-      const tableInfoString = `${result.tableName}: ${JSON.stringify(result.tableInfo)}`;
+      // 4. mermaid 코드 변환 (순차 처리로 충돌 방지) (+ 문자 제거)
+      const tableInfoString = `${result.tableName}: ${cleanedTableInfo}`;
       await vscode.commands.executeCommand('visualdbforpms.changeMermaid', tableInfoString);
     }
     
@@ -857,6 +852,74 @@ async function main() {
     }
   }
 
+  /**
+   * AI 응답에서 특정 조건을 만족하는 라인만 추출하는 함수
+   * @param aiResponse AI API 응답 문자열
+   * @returns 조건을 만족하는 라인들만 포함된 문자열
+   */
+  function extractRelationLines(aiResponse: string): string {
+    console.log('extractRelationLines called with:', aiResponse);
+    
+    // 문자열을 라인별로 분할
+    const lines = aiResponse.split('\n');
+    const filteredLines: string[] = [];
+    
+    // 각 라인을 검사
+    for (let index = 0; index < lines.length; index++) {
+      const line = lines[index];
+      const trimmedLine = line.trim();
+      
+      // 한글 포함 여부 확인 (한글이 포함된 라인은 제외)
+      const hasKorean = /[가-힣]/.test(trimmedLine);
+      if (hasKorean) {
+        console.log(`Line ${index + 1} contains Korean, skipping:`, trimmedLine);
+        continue;
+      }
+      
+      // 조건 확인: '--'가 포함되어 있고, 1:1, 1:N, N:N 중 하나가 포함된 라인
+      const hasDash = trimmedLine.includes('--');
+      const hasRelation = /1:1|1:N|N:N/.test(trimmedLine);
+      
+      if (hasDash && hasRelation) {
+        console.log(`Line ${index + 1} matches criteria:`, trimmedLine);
+        filteredLines.push(trimmedLine);
+      }
+    }
+    
+    const result = filteredLines.join('\n');
+    console.log('Extracted relation lines:', result);
+    console.log('Total matching lines:', filteredLines.length);
+    
+    return result;
+  }
+
+  /**
+   * 추출된 관계 라인들을 모두 대문자로 변환하는 함수
+   * @param extractedLines 추출된 관계 라인들
+   * @returns 대문자로 변환된 관계 라인들
+   */
+  function convertRelationLinesToUpperCase(extractedLines: string): string {
+    console.log('convertRelationLinesToUpperCase called with:', extractedLines);
+    
+    if (!extractedLines.trim()) {
+      console.log('No lines to convert');
+      return extractedLines;
+    }
+    
+    // 라인별로 분할하여 각 라인을 대문자로 변환
+    const lines = extractedLines.split('\n');
+    const upperCaseLines = lines.map(line => {
+      const upperCaseLine = line.toUpperCase();
+      console.log('Converted line:', line, '→', upperCaseLine);
+      return upperCaseLine;
+    });
+    
+    const result = upperCaseLines.join('\n');
+    console.log('Final uppercase lines:', result);
+    
+    return result;
+  }
+
   // 기존 함수와의 호환성을 위한 별칭
   function extractBeetweenBacktics(input: string): string {
     return extractMermaidCode(input);
@@ -913,6 +976,48 @@ erDiagram
       
       const convertedCode = convertTableNameToUpperCase(extractedCode);
       console.log('Converted code:', convertedCode);
+      console.log('---');
+    });
+  }
+
+  // 테스트용 함수 - 관계 라인 추출 및 대문자 변환 테스트
+  function testRelationLineExtraction(): void {
+    const testInputs = [
+      `이것은 테스트 응답입니다.
+테이블A -- 1:N --> 테이블B
+테이블B -- N:N --> 테이블C
+테이블D -- 1:1 --> 테이블E
+일반적인 텍스트 라인
+테이블F --> 테이블G (관계 없음)
+테이블H -- 1:N --> 테이블I
+마지막 라인입니다.`,
+      
+      `다른 테스트 케이스:
+USERS -- 1:N --> ORDERS
+ORDERS -- 1:N --> ORDER_ITEMS
+PRODUCTS -- N:N --> CATEGORIES
+이것은 조건을 만족하지 않는 라인입니다.`,
+      
+      `혼합 테스트 케이스:
+USERS -- 1:N --> ORDERS
+사용자 테이블과 주문 테이블의 관계
+ORDERS -- 1:N --> ORDER_ITEMS
+주문 상세 정보 테이블
+PRODUCTS -- N:N --> CATEGORIES
+상품과 카테고리의 다대다 관계
+CUSTOMERS -- 1:1 --> CUSTOMER_PROFILES
+고객 프로필 정보`
+    ];
+
+    testInputs.forEach((input, index) => {
+      console.log(`Relation Line Test ${index + 1}:`);
+      console.log('Input:', input);
+      
+      const extractedLines = extractRelationLines(input);
+      console.log('Extracted lines:', extractedLines);
+      
+      const upperCaseLines = convertRelationLinesToUpperCase(extractedLines);
+      console.log('Uppercase lines:', upperCaseLines);
       console.log('---');
     });
   }
@@ -1279,12 +1384,18 @@ Relation 97:
         const batch = batches[batchIndex];
         console.log(`Processing batch ${batchIndex + 1}/${batches.length} with ${batch.length} relations`);
         
-        try {
-          // AI API 호출
-          const aiResponse = await callAIRelationApi(batch);
-          
-          // AI 응답을 파일에 저장
-          await saveAIResponseToFile(batchIndex, aiResponse);
+                  try {
+            // AI API 호출
+            const aiResponse = await callAIRelationApi(batch);
+            
+            // AI 응답에서 관계 라인만 추출
+            const extractedLines = extractRelationLines(aiResponse);
+            
+            // 추출된 라인들을 대문자로 변환
+            const upperCaseLines = convertRelationLinesToUpperCase(extractedLines);
+            
+            // 대문자로 변환된 라인들을 파일에 저장
+            await saveAIResponseToFile(batchIndex, upperCaseLines);
           
           console.log(`Batch ${batchIndex + 1} processed successfully`);
           
@@ -1326,6 +1437,19 @@ export function deactivate() {}
   console.log(`modelAIresMap: ${JSON.stringify(modelAIresMap)}`)
   const modelAIresMapJson = JSON.stringify(Object.fromEntries(modelAIresMap));  // Map 객체를 JSON 문자열로 변환
   console.log(`modelAIresMapJson: ${modelAIresMapJson}`)
+  
+  // mermaidFilePath 파일 내용을 읽어오기
+  let mermaidFileContent = '';
+  try {
+    if (fs.existsSync(mermaidFilePath)) {
+      mermaidFileContent = fs.readFileSync(mermaidFilePath, 'utf8');
+      console.log('Mermaid file content loaded:', mermaidFileContent);
+    } else {
+      console.log('Mermaid file does not exist');
+    }
+  } catch (error) {
+    console.error('Error reading mermaid file:', error);
+  }
 		return `
 			<!DOCTYPE html>
 			<html lang="en">
@@ -1357,8 +1481,31 @@ export function deactivate() {}
           display: none;
         }
         .container {
-          width: 50%;
-          height: 50%;
+          width: 100%;
+          height: 100%;
+          padding: 20px;
+          overflow-y: auto;
+        }
+        .mermaid {
+          margin-bottom: 20px;
+          padding: 15px;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          background: #f9f9f9;
+        }
+        .mermaid-file-section {
+          margin-top: 30px;
+          padding: 20px;
+          background: #f0f8ff;
+          border-radius: 10px;
+          border: 2px solid #007acc;
+        }
+        .mermaid-file-title {
+          font-size: 18px;
+          font-weight: bold;
+          color: #007acc;
+          margin-bottom: 15px;
+          text-align: center;
         }
         </style>
 
@@ -1392,8 +1539,10 @@ export function deactivate() {}
         <script>
           const modelAIresMap = ${modelAIresMapJson}
           const mermaidContent = \`${mermaidContent}\`;
+          const mermaidFileContent = \`${mermaidFileContent}\`;
           console.log('Model AI Res Map:', modelAIresMap['PARTYROLEREL']);
           console.log('Mermaid Content:', mermaidContent);
+          console.log('Mermaid File Content:', mermaidFileContent);
           // console.log(${JSON.stringify(schema)})
           let mermaidContainer;
           document.addEventListener('DOMContentLoaded', () => {
@@ -1417,34 +1566,19 @@ export function deactivate() {}
                 console.log(diagramDiv)
             });
 
-            // Mermaid 파일 내용 추가 (있는 경우)
-            if (mermaidContent && mermaidContent.trim()) {
-              const mermaidBlocks = mermaidContent.split(/\\n\\s*\\n/).filter(block => block.trim());
-              mermaidBlocks.forEach((block, index) => {
-                if (block.trim()) {
-                  const diagramDiv = document.createElement('div');
-                  diagramDiv.className = 'mermaid';
-                  diagramDiv.textContent = block.trim();
-                  diagramDiv.style.cursor = 'pointer';
-                  diagramDiv.style.marginTop = '20px';
-                  diagramDiv.style.border = '1px solid #ddd';
-                  diagramDiv.style.padding = '10px';
-                  diagramDiv.addEventListener('click', () => showMermaidPopup(block.trim()));
-                  mermaidContainer.appendChild(diagramDiv);
-                  console.log('Added mermaid block:', block.trim());
-                }
-              });
-            } else {
-              // Mermaid 파일이 없을 때 안내 메시지
-              const noMermaidDiv = document.createElement('div');
-              noMermaidDiv.style.padding = '20px';
-              noMermaidDiv.style.textAlign = 'center';
-              noMermaidDiv.style.color = '#666';
-              noMermaidDiv.style.border = '2px dashed #ddd';
-              noMermaidDiv.style.marginTop = '20px';
-              noMermaidDiv.style.borderRadius = '8px';
-              noMermaidDiv.innerHTML = '<h3>📊 Mermaid 다이어그램</h3><p>Mermaid 파일이 없습니다.<br>fetchSchemas 명령어를 실행하여 다이어그램을 생성하세요.</p>';
-              mermaidContainer.appendChild(noMermaidDiv);
+            // mermaidContent 처리 (있는 경우)
+            // if (mermaidContent && mermaidContent.trim()) {
+            if (mermaidContent) {
+              const diagramDiv = document.createElement('div');
+              diagramDiv.className = 'mermaid';
+              diagramDiv.textContent = mermaidContent.trim();
+              diagramDiv.style.cursor = 'pointer';
+              diagramDiv.style.marginTop = '20px';
+              diagramDiv.style.border = '1px solid #ddd';
+              diagramDiv.style.padding = '10px';
+              //diagramDiv.addEventListener('click', () => showMermaidPopup(mermaidContent.trim()));
+              mermaidContainer.appendChild(diagramDiv);
+              console.log('Added mermaid content:', mermaidContent.trim());
             }
 
             // 팝업 관련 요소
