@@ -1,0 +1,354 @@
+Relation 1:
+  Child Table: chmm_code_info
+  Parent Table: chmm_category_info
+  Relationship Type: N:N
+
+Relation 2:
+  Child Table: chmm_code_item_info
+  Parent Table: chmm_code_info
+  Relationship Type: N:N
+
+Relation 3:
+  Child Table: pms_answer
+  Parent Table: pms_user
+  Relationship Type: N:N
+
+Relation 4:
+  Child Table: pms_answer
+  Parent Table: pms_question
+  Relationship Type: N:N
+
+Relation 5:
+  Child Table: pms_answer
+  Parent Table: pms_menu
+  Relationship Type: N:N
+
+Relation 6:
+  Child Table: pms_board
+  Parent Table: pms_user
+  Relationship Type: N:N
+
+Relation 7:
+  Child Table: pms_board
+  Parent Table: pms_menu
+  Relationship Type: N:N
+
+Relation 8:
+  Child Table: pms_button
+  Parent Table: pms_code
+  Relationship Type: N:N
+
+Relation 9:
+  Child Table: pms_button_role_map
+  Parent Table: pms_menu_button_map
+  Relationship Type: N:N
+
+Relation 10:
+  Child Table: pms_button_role_map
+  Parent Table: pms_user
+  Relationship Type: N:N
+
+Relation 11:
+  Child Table: pms_button_role_map
+  Parent Table: pms_role
+  Relationship Type: N:N
+
+Relation 12:
+  Child Table: pms_button_role_map
+  Parent Table: pms_project
+  Relationship Type: N:N
+
+Relation 13:
+  Child Table: pms_code
+  Parent Table: pms_user
+  Relationship Type: N:N
+
+Relation 14:
+  Child Table: pms_code
+  Parent Table: chmm_code_item_info
+  Relationship Type: N:N
+
+Relation 15:
+  Child Table: pms_company_registration_management
+  Parent Table: pms_user
+  Relationship Type: N:N
+
+Relation 16:
+  Child Table: pms_company_registration_management
+  Parent Table: pms_code
+  Relationship Type: N:N
+
+Relation 17:
+  Child Table: pms_department
+  Parent Table: pms_user
+  Relationship Type: N:N
+
+Relation 18:
+  Child Table: pms_department
+  Parent Table: pms_department
+  Relationship Type: N:N
+
+Relation 19:
+  Child Table: pms_export_management
+  Parent Table: pms_project
+  Relationship Type: N:N
+
+Relation 20:
+  Child Table: pms_export_management
+  Parent Table: pms_user
+  Relationship Type: N:N
+
+Relation 21:
+  Child Table: pms_group
+  Parent Table: pms_user
+  Relationship Type: N:N
+
+Relation 22:
+  Child Table: pms_group
+  Parent Table: pms_code
+  Relationship Type: N:N
+
+Relation 23:
+  Child Table: pms_group
+  Parent Table: pms_project
+  Relationship Type: N:N
+
+Relation 24:
+  Child Table: pms_group_pms_user_group_map
+  Parent Table: pms_user_group_map
+  Relationship Type: N:N
+
+Relation 25:
+  Child Table: pms_group_pms_user_group_map
+  Parent Table: pms_group
+  Relationship Type: N:N
+
+Relation 26:
+  Child Table: pms_input_person
+  Parent Table: pms_project
+  Relationship Type: N:N
+
+Relation 27:
+  Child Table: pms_input_person
+  Parent Table: pms_code
+  Relationship Type: N:N
+
+Relation 28:
+  Child Table: pms_input_person
+  Parent Table: pms_input_person
+  Relationship Type: N:N
+
+Relation 29:
+  Child Table: pms_input_person
+  Parent Table: pms_user
+  Relationship Type: N:N
+
+Relation 30:
+  Child Table: pms_menu
+  Parent Table: pms_project
+  Relationship Type: N:N
+
+Relation 31:
+  Child Table: pms_menu
+  Parent Table: pms_user
+  Relationship Type: N:N
+
+Relation 32:
+  Child Table: pms_menu
+  Parent Table: pms_menu
+  Relationship Type: N:N
+
+Relation 33:
+  Child Table: pms_menu
+  Parent Table: pms_code
+  Relationship Type: N:N
+
+Relation 34:
+  Child Table: pms_menu_button_map
+  Parent Table: pms_menu
+  Relationship Type: N:N
+
+Relation 35:
+  Child Table: pms_menu_button_map
+  Parent Table: pms_button
+  Relationship Type: N:N
+
+Relation 36:
+  Child Table: pms_menu_button_map
+  Parent Table: pms_project
+  Relationship Type: N:N
+
+Relation 37:
+  Child Table: pms_menu_role_map
+  Parent Table: pms_menu
+  Relationship Type: N:N
+
+Relation 38:
+  Child Table: pms_menu_role_map
+  Parent Table: pms_user
+  Relationship Type: N:N
+
+Relation 39:
+  Child Table: pms_menu_role_map
+  Parent Table: pms_role
+  Relationship Type: N:N
+
+Relation 40:
+  Child Table: pms_menu_role_map
+  Parent Table: pms_project
+  Relationship Type: N:N
+
+Relation 41:
+  Child Table: pms_message
+  Parent Table: pms_user
+  Relationship Type: N:N
+
+Relation 42:
+  Child Table: pms_message
+  Parent Table: pms_project
+  Relationship Type: N:N
+
+Relation 43:
+  Child Table: pms_message_recipient_map
+  Parent Table: pms_message
+  Relationship Type: N:N
+
+Relation 44:
+  Child Table: pms_message_recipient_map
+  Parent Table: pms_project
+  Relationship Type: N:N
+
+Relation 45:
+  Child Table: pms_message_recipient_map
+  Parent Table: pms_user
+  Relationship Type: N:N
+
+Relation 46:
+  Child Table: pms_project
+  Parent Table: pms_user
+  Relationship Type: N:N
+
+Relation 47:
+  Child Table: pms_project
+  Parent Table: pms_code
+  Relationship Type: N:N
+
+Relation 48:
+  Child Table: pms_project
+  Parent Table: pms_company_registration_management
+  Relationship Type: N:N
+
+Relation 49:
+  Child Table: pms_project
+  Parent Table: pms_department
+  Relationship Type: N:N
+
+Relation 50:
+  Child Table: pms_project_code
+  Parent Table: pms_code
+  Relationship Type: N:N
+
+Relation 51:
+  Child Table: pms_project_code
+  Parent Table: pms_user
+  Relationship Type: N:N
+
+Relation 52:
+  Child Table: pms_project_code
+  Parent Table: chmm_code_info
+  Relationship Type: N:N
+
+Relation 53:
+  Child Table: pms_project_code
+  Parent Table: pms_project
+  Relationship Type: N:N
+
+Relation 54:
+  Child Table: pms_question
+  Parent Table: pms_user
+  Relationship Type: N:N
+
+Relation 55:
+  Child Table: pms_question
+  Parent Table: pms_menu
+  Relationship Type: N:N
+
+Relation 56:
+  Child Table: pms_question
+  Parent Table: pms_project
+  Relationship Type: N:N
+
+Relation 57:
+  Child Table: pms_role
+  Parent Table: pms_code
+  Relationship Type: N:N
+
+Relation 58:
+  Child Table: pms_role
+  Parent Table: pms_user
+  Relationship Type: N:N
+
+Relation 59:
+  Child Table: pms_special_department
+  Parent Table: pms_user
+  Relationship Type: N:N
+
+Relation 60:
+  Child Table: pms_special_department
+  Parent Table: pms_code
+  Relationship Type: N:N
+
+Relation 61:
+  Child Table: pms_task
+  Parent Table: pms_project
+  Relationship Type: N:N
+
+Relation 62:
+  Child Table: pms_task
+  Parent Table: pms_code
+  Relationship Type: N:N
+
+Relation 63:
+  Child Table: pms_task
+  Parent Table: pms_user
+  Relationship Type: N:N
+
+Relation 64:
+  Child Table: pms_template
+  Parent Table: pms_user
+  Relationship Type: N:N
+
+Relation 65:
+  Child Table: pms_template
+  Parent Table: pms_code
+  Relationship Type: N:N
+
+Relation 66:
+  Child Table: pms_user_group_map
+  Parent Table: pms_group
+  Relationship Type: N:N
+
+Relation 67:
+  Child Table: pms_user_group_map
+  Parent Table: pms_user_project_map
+  Relationship Type: N:N
+
+Relation 68:
+  Child Table: pms_user_group_role_map
+  Parent Table: pms_group
+  Relationship Type: N:N
+
+Relation 69:
+  Child Table: pms_user_group_role_map
+  Parent Table: pms_project
+  Relationship Type: N:N
+
+Relation 70:
+  Child Table: pms_user_group_role_map
+  Parent Table: pms_user
+  Relationship Type: N:N
+
+Relation 71:
+  Child Table: pms_user_group_role_map
+  Parent Table: pms_role
+  Relationship Type: N:N

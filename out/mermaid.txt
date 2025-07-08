@@ -1,0 +1,2134 @@
+
+
+CHMM_CATEGORY_INFO {
+        CATEGORY_ID varchar(255) PK
+        CATEGORY_DESC varchar(1000)
+        ORDER_NUM int
+        USE_YN varchar(1)
+        SYS_INSERT_DTM datetime
+        SYS_INSERT_USER_ID varchar(255)
+        SYS_UPDATE_DTM datetime
+        SYS_UPDATE_USER_ID varchar(255)
+        REAL_VALUE varchar(100)
+        is_delete tinyint(1)
+        service_code varchar(255)
+    }
+
+PMS_ANSWER {
+        bigint seq PK
+        datetime(6) create_date_time
+        datetime(6) update_date_time
+        mediumblob content
+        bit(1) is_use
+        bigint read_count
+        varchar(255) title
+        bigint creator_seq FK
+        bigint updater_seq FK
+        bigint project_menu_seq FK
+        bigint question_seq FK
+    }
+
+CHMM_CODE_INFO {
+        CATEGORY_ID varchar(255) PK
+        CODE_ID varchar(255) PK
+        CODE_DESC varchar(1000)
+        ORDER_NUM int
+        USE_YN varchar(1)
+        SYS_INSERT_DTM datetime
+        SYS_INSERT_USER_ID varchar(255)
+        SYS_UPDATE_DTM datetime
+        SYS_UPDATE_USER_ID varchar(255)
+        REAL_VALUE varchar(100)
+        is_delete tinyint(1)
+    }
+CHMM_CATEGORY_INFO ||--O{ CHMM_CODE_INFO : "N:N"
+CHMM_CODE_INFO ||--O{ CHMM_CODE_ITEM_INFO : "N:N"
+PMS_USER ||--O{ PMS_ANSWER : "N:N"
+PMS_QUESTION ||--O{ PMS_ANSWER : "N:N"
+PMS_MENU ||--O{ PMS_ANSWER : "N:N"
+PMS_USER ||--O{ PMS_BOARD : "N:N"
+PMS_MENU ||--O{ PMS_BOARD : "N:N"
+PMS_CODE ||--O{ PMS_BUTTON : "N:N"
+PMS_MENU_BUTTON_MAP ||--O{ PMS_BUTTON_ROLE_MAP : "N:N"
+PMS_USER ||--O{ PMS_BUTTON_ROLE_MAP : "N:N"
+
+
+PMS_CODE {
+        bigint seq PK
+        datetime(6) create_date_time
+        datetime(6) update_date_time
+        varchar(255) code
+        bit(1) is_use
+        varchar(255) name
+        varchar(255) real_value
+        varchar(255) service_code
+        bigint creator_seq FK
+        bigint updater_seq FK
+        varchar(255) category_id FK
+        varchar(255) code_id FK
+        varchar(255) code_item_id FK
+    }
+
+PMS_GROUP_PMS_USER_GROUP_MAP {
+        PROJECT_GROUP_SEQ bigint FK
+        USER_GROUP_LIST_SEQ bigint PK
+        USER_GROUP_LIST_SEQ bigint PK
+    }
+
+PMS_GROUP {
+        SEQ BigInt PK
+        CREATE_DATE_TIME DateTime(6)
+        UPDATE_DATE_TIME DateTime(6)
+        DESCRIPTION Varchar(255)
+        NAME Varchar(255)
+        CREATOR_SEQ BigInt FK
+        UPDATER_SEQ BigInt FK
+        IS_USE_SEQ BigInt FK
+        PROJECT_SEQ BigInt FK
+        IS_DEFAULT Bit(1)
+        GROUP_ID Varchar(255)
+    }
+CHMM_CODE_INFO ||--|| CHMM_CATEGORY_INFO : "N:N"
+CHMM_CODE_INFO ||--|| CHMM_CODE_ITEM_INFO : "N:N"
+PMS_ANSWER ||--|| PMS_USER : "N:N"
+PMS_ANSWER ||--|| PMS_QUESTION : "N:N"
+PMS_ANSWER ||--|| PMS_MENU : "N:N"
+PMS_BOARD ||--|| PMS_USER : "N:N"
+PMS_BOARD ||--|| PMS_MENU : "N:N"
+PMS_BUTTON ||--|| PMS_CODE : "N:N"
+PMS_BUTTON_ROLE_MAP ||--|| PMS_MENU_BUTTON_MAP : "N:N"
+PMS_BUTTON_ROLE_MAP ||--|| PMS_USER : "N:N"
+
+
+PMS_EXPORT_MANAGEMENT {
+        bigint seq PK
+        datetime(6) create_date_time
+        datetime(6) update_date_time
+        varchar(255) type
+        bigint creator_seq FK
+        bigint updater_seq FK
+        bigint project_seq FK
+    }
+PMS_BUTTON_ROLE_MAP }O--O{ PMS_ROLE : "N:N"
+PMS_BUTTON_ROLE_MAP }O--O{ PMS_PROJECT : "N:N"
+PMS_CODE }O--O{ PMS_USER : "N:N"
+PMS_CODE }O--O{ CHMM_CODE_ITEM_INFO : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT }O--O{ PMS_USER : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT }O--O{ PMS_CODE : "N:N"
+PMS_DEPARTMENT }O--O{ PMS_USER : "N:N"
+PMS_DEPARTMENT }O--O{ PMS_DEPARTMENT : "N:N"
+PMS_EXPORT_MANAGEMENT }O--O{ PMS_PROJECT : "N:N"
+PMS_EXPORT_MANAGEMENT }O--O{ PMS_USER : "N:N"
+
+
+PMS_SPECIAL_DEPARTMENT {
+        SEQ bigint PK
+        CREATE_DATE_TIME datetime(6)
+        UPDATE_DATE_TIME datetime(6)
+        DEPT_ID varchar(255)
+        CREATOR_SEQ bigint FK
+        UPDATER_SEQ bigint FK
+        TYPE_SEQ bigint FK
+    }
+CHMM_CATEGORY_INFO ||--O{ CHMM_CODE_INFO : "N:N"
+CHMM_CODE_INFO ||--O{ CHMM_CODE_ITEM_INFO : "N:N"
+PMS_USER ||--O{ PMS_ANSWER : "N:N"
+PMS_QUESTION ||--O{ PMS_ANSWER : "N:N"
+PMS_MENU ||--O{ PMS_ANSWER : "N:N"
+PMS_USER ||--O{ PMS_BOARD : "N:N"
+PMS_MENU ||--O{ PMS_BOARD : "N:N"
+PMS_CODE ||--O{ PMS_BUTTON : "N:N"
+PMS_MENU_BUTTON_MAP ||--O{ PMS_BUTTON_ROLE_MAP : "N:N"
+PMS_USER ||--O{ PMS_BUTTON_ROLE_MAP : "N:N"
+
+CHMM_CATEGORY_INFO ||--O{ CHMM_CODE_INFO : "N:N"
+CHMM_CODE_INFO ||--O{ CHMM_CODE_ITEM_INFO : "N:N"
+PMS_USER ||--O{ PMS_ANSWER : "N:N"
+PMS_QUESTION ||--O{ PMS_ANSWER : "N:N"
+PMS_MENU ||--O{ PMS_ANSWER : "N:N"
+PMS_USER ||--O{ PMS_BOARD : "N:N"
+PMS_MENU ||--O{ PMS_BOARD : "N:N"
+PMS_CODE ||--O{ PMS_BUTTON : "N:N"
+PMS_MENU_BUTTON_MAP ||--O{ PMS_BUTTON_ROLE_MAP : "N:N"
+PMS_USER ||--O{ PMS_BUTTON_ROLE_MAP : "N:N"
+
+
+PMS_USER_GROUP_MAP {
+        bigint seq PK
+        bigint project_group_seq FK
+        bigint user_project_seq
+        bigint user_project_seq
+        bigint user_project_seq FK
+    }
+CHMM_CODE_INFO ||--O{ CHMM_CATEGORY_INFO : "N:N"
+CHMM_CODE_ITEM_INFO ||--O{ CHMM_CODE_INFO : "N:N"
+PMS_ANSWER ||--O{ PMS_USER : "N:N"
+PMS_ANSWER ||--O{ PMS_QUESTION : "N:N"
+PMS_ANSWER ||--O{ PMS_MENU : "N:N"
+PMS_BOARD ||--O{ PMS_USER : "N:N"
+PMS_BOARD ||--O{ PMS_MENU : "N:N"
+PMS_BUTTON ||--O{ PMS_CODE : "N:N"
+PMS_BUTTON_ROLE_MAP ||--O{ PMS_MENU_BUTTON_MAP : "N:N"
+PMS_BUTTON_ROLE_MAP ||--O{ PMS_USER : "N:N"
+
+
+PMS_QUESTION {
+        bigint seq PK
+        datetime(6) create_date_time
+        datetime(6) update_date_time
+        varchar(30) action_status
+        mediumblob content
+        varchar(30) in_charge
+        bit(1) is_common
+        bit(1) is_use
+        varchar(255) menu_location
+        bigint read_count
+        varchar(255) title
+        int top_pin
+        bigint creator_seq FK
+        bigint updater_seq FK
+        bigint project_menu_seq FK
+        bigint project_seq FK
+        tinyint(1) is_secret_message
+    }
+
+CHMM_CODE_ITEM_INFO {
+        CATEGORY_ID varchar(255) PK
+        CODE_ID varchar(255) PK
+        CODE_ITEM_ID varchar(255) PK
+        CODE_ITEM_DESC varchar(1000)
+        ORDER_NUM int
+        USE_YN varchar(1)
+        SYS_INSERT_DTM datetime
+        SYS_INSERT_USER_ID varchar(255)
+        SYS_UPDATE_DTM datetime
+        SYS_UPDATE_USER_ID varchar(255)
+        REAL_VALUE varchar(100)
+        is_delete tinyint(1)
+    }
+PMS_USER ||--O{ PMS_GROUP : "N:N"
+PMS_CODE ||--O{ PMS_GROUP : "N:N"
+PMS_PROJECT ||--O{ PMS_GROUP : "N:N"
+PMS_USER_GROUP_MAP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_GROUP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_CODE ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_INPUT_PERSON ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_USER ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU : "N:N"
+
+CHMM_CODE_INFO ||--|| CHMM_CATEGORY_INFO : "N:N"
+CHMM_CODE_ITEM_INFO ||--|| CHMM_CODE_INFO : "N:N"
+PMS_ANSWER ||--|| PMS_USER : "N:N"
+PMS_ANSWER ||--|| PMS_QUESTION : "N:N"
+PMS_ANSWER ||--|| PMS_MENU : "N:N"
+PMS_BOARD ||--|| PMS_USER : "N:N"
+PMS_BOARD ||--|| PMS_MENU : "N:N"
+PMS_BUTTON ||--|| PMS_CODE : "N:N"
+PMS_BUTTON_ROLE_MAP ||--|| PMS_MENU_BUTTON_MAP : "N:N"
+PMS_BUTTON_ROLE_MAP ||--|| PMS_USER : "N:N"
+
+PMS_BUTTON_ROLE_MAP }O--O{ PMS_ROLE : "N:N"
+PMS_BUTTON_ROLE_MAP }O--O{ PMS_PROJECT : "N:N"
+PMS_CODE }O--O{ PMS_USER : "N:N"
+PMS_CODE }O--O{ CHMM_CODE_ITEM_INFO : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT }O--O{ PMS_USER : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT }O--O{ PMS_CODE : "N:N"
+PMS_DEPARTMENT }O--O{ PMS_USER : "N:N"
+PMS_DEPARTMENT }O--O{ PMS_DEPARTMENT : "N:N"
+PMS_EXPORT_MANAGEMENT }O--O{ PMS_PROJECT : "N:N"
+PMS_EXPORT_MANAGEMENT }O--O{ PMS_USER : "N:N"
+
+PMS_BUTTON_ROLE_MAP }O--O{ PMS_ROLE : "N:N"
+PMS_BUTTON_ROLE_MAP }O--O{ PMS_PROJECT : "N:N"
+PMS_CODE }O--O{ PMS_USER : "N:N"
+PMS_CODE }O--O{ CHMM_CODE_ITEM_INFO : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT }O--O{ PMS_USER : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT }O--O{ PMS_CODE : "N:N"
+PMS_DEPARTMENT }O--O{ PMS_USER : "N:N"
+PMS_DEPARTMENT }O--O{ PMS_DEPARTMENT : "N:N"
+PMS_EXPORT_MANAGEMENT }O--O{ PMS_PROJECT : "N:N"
+PMS_EXPORT_MANAGEMENT }O--O{ PMS_USER : "N:N"
+
+CHMM_CODE_INFO }O--O{ CHMM_CATEGORY_INFO : "N:N"
+CHMM_CODE_ITEM_INFO }O--O{ CHMM_CODE_INFO : "N:N"
+PMS_ANSWER }O--O{ PMS_USER : "N:N"
+PMS_ANSWER }O--O{ PMS_QUESTION : "N:N"
+PMS_ANSWER }O--O{ PMS_MENU : "N:N"
+PMS_BOARD }O--O{ PMS_USER : "N:N"
+PMS_BOARD }O--O{ PMS_MENU : "N:N"
+PMS_BUTTON }O--O{ PMS_CODE : "N:N"
+PMS_BUTTON_ROLE_MAP }O--O{ PMS_MENU_BUTTON_MAP : "N:N"
+PMS_BUTTON_ROLE_MAP }O--O{ PMS_USER : "N:N"
+
+
+PMS_TASK {
+        SEQ bigint PK
+        IS_LEAF bit(1)
+        LEVEL bigint
+        OUTPUT varchar(255)
+        PLAN_END_DATE datetime(6)
+        PLAN_RATE decimal
+        PLAN_START_DATE datetime(6)
+        REAL_END_DATE datetime(6)
+        REAL_RATE decimal
+        REAL_START_DATE datetime(6)
+        TASK_NAME varchar(255)
+        TASK_NUMBER varchar(255)
+        TOTAL_DURATION bigint
+        WEIGHT int
+        PROJECT_SEQ bigint FK
+        STATUS_CODE_SEQ bigint FK
+        THIS_WEEK_PLAN_RATE decimal
+        NOTE varchar(255)
+        PACKAGE_WEIGHT int
+        PARENT_TASK_NUMBER varchar(255)
+        ASSIGNEE_SEQ bigint FK
+        IS_UPDATE bit(1)
+        PREDECESSOR_TASK_LIST text
+        SUCCESSOR_TASK_LIST text
+    }
+PMS_BUTTON_ROLE_MAP }O--O{ PMS_ROLE : "N:N"
+PMS_BUTTON_ROLE_MAP }O--O{ PMS_PROJECT : "N:N"
+PMS_CODE }O--O{ PMS_USER : "N:N"
+PMS_CODE }O--O{ CHMM_CODE_ITEM_INFO : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT }O--O{ PMS_USER : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT }O--O{ PMS_CODE : "N:N"
+PMS_DEPARTMENT }O--O{ PMS_USER : "N:N"
+PMS_DEPARTMENT }O--O{ PMS_DEPARTMENT : "N:N"
+PMS_EXPORT_MANAGEMENT }O--O{ PMS_PROJECT : "N:N"
+PMS_EXPORT_MANAGEMENT }O--O{ PMS_USER : "N:N"
+
+CHMM_CATEGORY_INFO ||--O{ CHMM_CODE_INFO : "N:N"
+CHMM_CODE_INFO ||--O{ CHMM_CODE_ITEM_INFO : "N:N"
+PMS_USER ||--O{ PMS_ANSWER : "N:N"
+PMS_QUESTION ||--O{ PMS_ANSWER : "N:N"
+PMS_MENU ||--O{ PMS_ANSWER : "N:N"
+PMS_USER ||--O{ PMS_BOARD : "N:N"
+PMS_MENU ||--O{ PMS_BOARD : "N:N"
+PMS_CODE ||--O{ PMS_BUTTON : "N:N"
+PMS_MENU_BUTTON_MAP ||--O{ PMS_BUTTON_ROLE_MAP : "N:N"
+PMS_USER ||--O{ PMS_BUTTON_ROLE_MAP : "N:N"
+
+CHMM_CATEGORY_INFO ||--O{ CHMM_CODE_INFO : "N:N"
+CHMM_CODE_INFO ||--O{ CHMM_CODE_ITEM_INFO : "N:N"
+PMS_USER ||--O{ PMS_ANSWER : "N:N"
+PMS_QUESTION ||--O{ PMS_ANSWER : "N:N"
+PMS_MENU ||--O{ PMS_ANSWER : "N:N"
+PMS_USER ||--O{ PMS_BOARD : "N:N"
+PMS_MENU ||--O{ PMS_BOARD : "N:N"
+PMS_CODE ||--O{ PMS_BUTTON : "N:N"
+PMS_MENU_BUTTON_MAP ||--O{ PMS_BUTTON_ROLE_MAP : "N:N"
+PMS_USER ||--O{ PMS_BUTTON_ROLE_MAP : "N:N"
+
+
+PMS_USER_GROUP_ROLE_MAP {
+        bigint seq PK
+        datetime(6) create_date_time
+        datetime(6) update_date_time
+        bit(1) is_map
+        bigint creator_seq FK
+        bigint updater_seq FK
+        bigint project_seq FK
+        bigint project_group_seq FK
+        bigint role_seq FK
+        bit(1) is_default
+    }
+PMS_BUTTON_ROLE_MAP }O--O{ PMS_ROLE : "N:N"
+PMS_BUTTON_ROLE_MAP }O--O{ PMS_PROJECT : "N:N"
+PMS_CODE }O--O{ PMS_USER : "N:N"
+PMS_CODE }O--O{ CHMM_CODE_ITEM_INFO : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT }O--O{ PMS_USER : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT }O--O{ PMS_CODE : "N:N"
+PMS_DEPARTMENT }O--O{ PMS_USER : "N:N"
+PMS_DEPARTMENT }O--O{ PMS_DEPARTMENT : "N:N"
+PMS_EXPORT_MANAGEMENT }O--O{ PMS_PROJECT : "N:N"
+PMS_EXPORT_MANAGEMENT }O--O{ PMS_USER : "N:N"
+
+
+
+CHMM_CATEGORY_INFO ||--O{ CHMM_CODE_INFO : "N:N"
+CHMM_CODE_INFO ||--O{ CHMM_CODE_ITEM_INFO : "N:N"
+PMS_USER ||--O{ PMS_ANSWER : "N:N"
+PMS_QUESTION ||--O{ PMS_ANSWER : "N:N"
+PMS_MENU ||--O{ PMS_ANSWER : "N:N"
+PMS_USER ||--O{ PMS_BOARD : "N:N"
+PMS_MENU ||--O{ PMS_BOARD : "N:N"
+PMS_CODE ||--O{ PMS_BUTTON : "N:N"
+PMS_MENU_BUTTON_MAP ||--O{ PMS_BUTTON_ROLE_MAP : "N:N"
+PMS_USER ||--O{ PMS_BUTTON_ROLE_MAP : "N:N"
+
+
+PMS_COMPANY_REGISTRATION_MANAGEMENT {
+        SEQ bigint PK
+        CREATE_DATE_TIME datetime(6)
+        UPDATE_DATE_TIME datetime(6)
+        ABBREVIATION varchar(255)
+        ENGLISH_NAME varchar(255)
+        IS_ABBREVIATION_CHANGEABLE bit(1)
+        IS_DELETE bit(1)
+        IS_MOIN_USE bit(1)
+        IS_TENANT bit(1)
+        IS_USAGE_FEE_END bit(1)
+        IS_USE bit(1)
+        MOIN_CODE varchar(255)
+        NAME varchar(255)
+        NOTE varchar(255)
+        CREATOR_SEQ bigint FK
+        UPDATER_SEQ bigint FK
+        CATEGORY_SEQ bigint FK
+        REPRESENTATIVE_SEQ bigint FK
+    }
+CHMM_CODE_INFO ||--O{ CHMM_CATEGORY_INFO : "N:N"
+CHMM_CODE_ITEM_INFO ||--O{ CHMM_CODE_INFO : "N:N"
+PMS_ANSWER ||--O{ PMS_USER : "N:N"
+PMS_ANSWER ||--O{ PMS_QUESTION : "N:N"
+PMS_ANSWER ||--O{ PMS_MENU : "N:N"
+PMS_BOARD ||--O{ PMS_USER : "N:N"
+PMS_BOARD ||--O{ PMS_MENU : "N:N"
+PMS_BUTTON ||--O{ PMS_CODE : "N:N"
+PMS_BUTTON_ROLE_MAP ||--O{ PMS_MENU_BUTTON_MAP : "N:N"
+PMS_BUTTON_ROLE_MAP ||--O{ PMS_USER : "N:N"
+
+
+PMS_DEPARTMENT {
+        DEPT_ID varchar(5) PK
+        CREATE_DATE_TIME datetime(6)
+        IS_USE bit(1)
+        LEVEL varchar(5)
+        NAME varchar(100)
+        SORT int
+        TYPE varchar(5)
+        UPDATE_DATE_TIME datetime(6)
+        PARENT_DEPARTMENT_DEPT_ID varchar(5) FK
+        CREATOR_SEQ bigint FK
+        UPDATER_SEQ bigint FK
+    }
+PMS_BUTTON_ROLE_MAP }O--O{ PMS_ROLE : "N:N"
+PMS_BUTTON_ROLE_MAP }O--O{ PMS_PROJECT : "N:N"
+PMS_CODE }O--O{ PMS_USER : "N:N"
+PMS_CODE }O--O{ CHMM_CODE_ITEM_INFO : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT }O--O{ PMS_USER : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT }O--O{ PMS_CODE : "N:N"
+PMS_DEPARTMENT }O--O{ PMS_USER : "N:N"
+PMS_DEPARTMENT }O--O{ PMS_DEPARTMENT : "N:N"
+PMS_EXPORT_MANAGEMENT }O--O{ PMS_PROJECT : "N:N"
+PMS_EXPORT_MANAGEMENT }O--O{ PMS_USER : "N:N"
+
+PMS_USER ||--O{ PMS_MENU : "N:N"
+PMS_MENU ||--O{ PMS_MENU : "N:N (SELF-JOIN)"
+PMS_MENU ||--O{ PMS_CODE : "N:N"
+PMS_MENU ||--O{ PMS_MENU_BUTTON_MAP : "N:N"
+PMS_BUTTON ||--O{ PMS_MENU_BUTTON_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU_BUTTON_MAP : "N:N"
+PMS_MENU ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+PMS_USER ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+PMS_ROLE ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+
+PMS_BUTTON_ROLE_MAP }O--O{ PMS_ROLE : "N:N"
+PMS_BUTTON_ROLE_MAP }O--O{ PMS_PROJECT : "N:N"
+PMS_CODE }O--O{ PMS_USER : "N:N"
+PMS_CODE }O--O{ CHMM_CODE_ITEM_INFO : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT }O--O{ PMS_USER : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT }O--O{ PMS_CODE : "N:N"
+PMS_DEPARTMENT }O--O{ PMS_USER : "N:N"
+PMS_DEPARTMENT }O--O{ PMS_DEPARTMENT : "N:N"
+PMS_EXPORT_MANAGEMENT }O--O{ PMS_PROJECT : "N:N"
+PMS_EXPORT_MANAGEMENT }O--O{ PMS_USER : "N:N"
+
+
+PMS_MENU_BUTTON_MAP {
+        SEQ BigInt PK
+        IS_MAP Bit(1)
+        BUTTON_SEQ BigInt FK
+        MENU_SEQ BigInt FK
+        PROJECT_SEQ BigInt FK
+        IS_DEFAULT Bit(1)
+    }
+CHMM_CODE_INFO ||--O| CHMM_CATEGORY_INFO : "N:N"
+CHMM_CODE_ITEM_INFO ||--O| CHMM_CODE_INFO : "N:N"
+PMS_ANSWER ||--O| PMS_USER : "N:N"
+PMS_ANSWER ||--O| PMS_QUESTION : "N:N"
+PMS_ANSWER ||--O| PMS_MENU : "N:N"
+PMS_BOARD ||--O| PMS_USER : "N:N"
+PMS_BOARD ||--O| PMS_MENU : "N:N"
+PMS_BUTTON ||--O| PMS_CODE : "N:N"
+PMS_BUTTON_ROLE_MAP ||--O| PMS_MENU_BUTTON_MAP : "N:N"
+PMS_BUTTON_ROLE_MAP ||--O| PMS_USER : "N:N"
+
+PMS_BUTTON_ROLE_MAP }O--O{ PMS_ROLE : "N:N"
+PMS_BUTTON_ROLE_MAP }O--O{ PMS_PROJECT : "N:N"
+PMS_CODE }O--O{ PMS_USER : "N:N"
+PMS_CODE }O--O{ CHMM_CODE_ITEM_INFO : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT }O--O{ PMS_USER : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT }O--O{ PMS_CODE : "N:N"
+PMS_DEPARTMENT }O--O{ PMS_USER : "N:N"
+PMS_DEPARTMENT }O--O{ PMS_DEPARTMENT : "N:N"
+PMS_EXPORT_MANAGEMENT }O--O{ PMS_PROJECT : "N:N"
+PMS_EXPORT_MANAGEMENT }O--O{ PMS_USER : "N:N"
+
+PMS_USER ||--O{ PMS_GROUP : "N:N"
+PMS_CODE ||--O{ PMS_GROUP : "N:N"
+PMS_PROJECT ||--O{ PMS_GROUP : "N:N"
+PMS_USER_GROUP_MAP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_GROUP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_CODE ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_INPUT_PERSON ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_USER ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU : "N:N"
+
+PMS_USER ||--O{ PMS_GROUP : "N:N"
+PMS_CODE ||--O{ PMS_GROUP : "N:N"
+PMS_PROJECT ||--O{ PMS_GROUP : "N:N"
+PMS_USER_GROUP_MAP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_GROUP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_CODE ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_INPUT_PERSON ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_USER ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU : "N:N"
+
+PMS_USER ||--O{ PMS_MENU : "N:N"
+PMS_MENU ||--O{ PMS_MENU : "N:N"
+PMS_MENU ||--O{ PMS_CODE : "N:N"
+PMS_MENU ||--O{ PMS_MENU_BUTTON_MAP : "N:N"
+PMS_BUTTON ||--O{ PMS_MENU_BUTTON_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU_BUTTON_MAP : "N:N"
+PMS_MENU ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+PMS_USER ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+PMS_ROLE ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+
+PMS_USER ||--O{ PMS_GROUP : "N:N"
+PMS_CODE ||--O{ PMS_GROUP : "N:N"
+PMS_PROJECT ||--O{ PMS_GROUP : "N:N"
+PMS_USER_GROUP_MAP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_GROUP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_CODE ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_INPUT_PERSON ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_USER ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU : "N:N"
+
+CHMM_CODE_INFO ||--O| CHMM_CATEGORY_INFO : "N:N"
+CHMM_CODE_ITEM_INFO ||--O| CHMM_CODE_INFO : "N:N"
+PMS_ANSWER ||--O| PMS_USER : "N:N"
+PMS_ANSWER ||--O| PMS_QUESTION : "N:N"
+PMS_ANSWER ||--O| PMS_MENU : "N:N"
+PMS_BOARD ||--O| PMS_USER : "N:N"
+PMS_BOARD ||--O| PMS_MENU : "N:N"
+PMS_BUTTON ||--O| PMS_CODE : "N:N"
+PMS_BUTTON_ROLE_MAP ||--O| PMS_MENU_BUTTON_MAP : "N:N"
+PMS_BUTTON_ROLE_MAP ||--O| PMS_USER : "N:N"
+
+PMS_BUTTON_ROLE_MAP }O--O{ PMS_ROLE : "N:N"
+PMS_BUTTON_ROLE_MAP }O--O{ PMS_PROJECT : "N:N"
+PMS_CODE }O--O{ PMS_USER : "N:N"
+PMS_CODE }O--O{ CHMM_CODE_ITEM_INFO : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT }O--O{ PMS_USER : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT }O--O{ PMS_CODE : "N:N"
+PMS_DEPARTMENT }O--O{ PMS_USER : "N:N"
+PMS_DEPARTMENT }O--O{ PMS_DEPARTMENT : "N:N"
+PMS_EXPORT_MANAGEMENT }O--O{ PMS_PROJECT : "N:N"
+PMS_EXPORT_MANAGEMENT }O--O{ PMS_USER : "N:N"
+
+
+PMS_BOARD {
+        SEQ bigint PK
+        CREATE_DATE_TIME datetime(6)
+        UPDATE_DATE_TIME datetime(6)
+        CONTENT mediumblob
+        IS_USE bit(1)
+        READ_COUNT bigint
+        TITLE varchar(255)
+        CREATOR_SEQ bigint FK
+        UPDATER_SEQ bigint FK
+        PROJECT_MENU_SEQ bigint FK
+    }
+
+
+
+PMS_TEMPLATE {
+        SEQ BigInt PK
+        CREATE_DATE_TIME DateTime(6)
+        UPDATE_DATE_TIME DateTime(6)
+        CREATOR_SEQ BigInt FK
+        UPDATER_SEQ BigInt FK
+        TYPE_SEQ BigInt FK
+    }
+CHMM_CODE_INFO ||--|| CHMM_CATEGORY_INFO : "N:N"
+CHMM_CODE_ITEM_INFO ||--|| CHMM_CODE_INFO : "N:N"
+PMS_ANSWER ||--|| PMS_USER : "N:N"
+PMS_ANSWER ||--|| PMS_QUESTION : "N:N"
+PMS_ANSWER ||--|| PMS_MENU : "N:N"
+PMS_BOARD ||--|| PMS_USER : "N:N"
+PMS_BOARD ||--|| PMS_MENU : "N:N"
+PMS_BUTTON ||--|| PMS_CODE : "N:N"
+PMS_BUTTON_ROLE_MAP ||--|| PMS_MENU_BUTTON_MAP : "N:N"
+PMS_BUTTON_ROLE_MAP ||--|| PMS_USER : "N:N"
+
+
+PMS_ROLE {
+        SEQ bigint PK
+        CREATE_DATE_TIME datetime(6)
+        UPDATE_DATE_TIME datetime(6)
+        DESCRIPTION varchar(255)
+        END_DATE datetime(6)
+        NAME varchar(255)
+        ROLE_ID varchar(255)
+        START_DATE datetime(6)
+        VIEW_ID bigint
+        CREATOR_SEQ bigint FK
+        UPDATER_SEQ bigint FK
+        IS_USE_SEQ bigint FK
+        IS_DEFAULT bit(1)
+        IS_ADMIN bit(1)
+        IS_QRS bit(1)
+    }
+PMS_BUTTON_ROLE_MAP }O--O{ PMS_ROLE : "N:N"
+PMS_BUTTON_ROLE_MAP }O--O{ PMS_PROJECT : "N:N"
+PMS_CODE }O--O{ PMS_USER : "N:N"
+PMS_CODE }O--O{ CHMM_CODE_ITEM_INFO : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT }O--O{ PMS_USER : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT }O--O{ PMS_CODE : "N:N"
+PMS_DEPARTMENT }O--O{ PMS_USER : "N:N"
+PMS_DEPARTMENT }O--O{ PMS_DEPARTMENT : "N:N"
+PMS_EXPORT_MANAGEMENT }O--O{ PMS_PROJECT : "N:N"
+PMS_EXPORT_MANAGEMENT }O--O{ PMS_USER : "N:N"
+
+
+PMS_MENU {
+        SEQ bigint PK
+        CREATE_DATE_TIME datetime(6)
+        UPDATE_DATE_TIME datetime(6)
+        MENU_DESC varchar(255)
+        MENU_ID varchar(255)
+        MENU_ORDER bigint
+        NAME varchar(255)
+        ORDER_HISTORY_DATETIME datetime(6)
+        ORDER_HISTROY bigint
+        TREE_ID bigint
+        URL varchar(255)
+        USE_HISTORY bit(1)
+        USE_HISTORY_DATETIME datetime(6)
+        CREATOR_SEQ bigint FK
+        UPDATER_SEQ bigint FK
+        IS_USE_SEQ bigint FK
+        PARENT_ID bigint FK
+        PMS_CODE_SEQ bigint FK
+        PROJECT_SEQ bigint FK
+        IS_ADMIN bit(1)
+        IS_MANUAL_USE char(1)
+    }
+PMS_USER ||--O{ PMS_MESSAGE : "N:N"
+PMS_USER ||--O{ PMS_PROJECT : "N:N"
+PMS_USER ||--O{ PMS_MESSAGE_RECIPIENT_MAP : "N:N"
+PMS_MESSAGE ||--O{ PMS_PROJECT : "N:N"
+PMS_MESSAGE ||--O{ PMS_MESSAGE_RECIPIENT_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_CODE : "N:N"
+PMS_PROJECT ||--O{ PMS_COMPANY_REGISTRATION_MANAGEMENT : "N:N"
+PMS_PROJECT ||--O{ PMS_DEPARTMENT : "N:N"
+PMS_MESSAGE_RECIPIENT_MAP ||--O{ PMS_PROJECT : "N:N"
+PMS_PROJECT_CODE ||--O{ PMS_CODE : "N:N"
+
+CHMM_CATEGORY_INFO ||--O{ CHMM_CODE_INFO : "N:N"
+CHMM_CODE_INFO ||--O{ CHMM_CODE_ITEM_INFO : "N:N"
+PMS_USER ||--O{ PMS_ANSWER : "N:N"
+PMS_QUESTION ||--O{ PMS_ANSWER : "N:N"
+PMS_MENU ||--O{ PMS_ANSWER : "N:N"
+PMS_USER ||--O{ PMS_BOARD : "N:N"
+PMS_MENU ||--O{ PMS_BOARD : "N:N"
+PMS_CODE ||--O{ PMS_BUTTON : "N:N"
+PMS_MENU_BUTTON_MAP ||--O{ PMS_BUTTON_ROLE_MAP : "N:N"
+PMS_USER ||--O{ PMS_BUTTON_ROLE_MAP : "N:N"
+
+
+
+PMS_USER ||--O{ PMS_MENU : "N:N"
+PMS_MENU ||--O{ PMS_MENU : "N:N"
+PMS_MENU ||--O{ PMS_CODE : "N:N"
+PMS_MENU ||--O{ PMS_MENU_BUTTON_MAP : "N:N"
+PMS_BUTTON ||--O{ PMS_MENU_BUTTON_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU_BUTTON_MAP : "N:N"
+PMS_MENU ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+PMS_USER ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+PMS_ROLE ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+
+PMS_USER ||--O{ PMS_GROUP : "N:N"
+PMS_CODE ||--O{ PMS_GROUP : "N:N"
+PMS_PROJECT ||--O{ PMS_GROUP : "N:N"
+PMS_USER_GROUP_MAP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_GROUP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_CODE ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_INPUT_PERSON ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_USER ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU : "N:N"
+
+PMS_USER ||--O| PMS_MESSAGE : "N:N"
+PMS_USER ||--O| PMS_PROJECT : "N:N"
+PMS_USER ||--O| PMS_MESSAGE_RECIPIENT_MAP : "N:N"
+PMS_MESSAGE ||--O| PMS_PROJECT : "N:N"
+PMS_MESSAGE ||--O| PMS_MESSAGE_RECIPIENT_MAP : "N:N"
+PMS_PROJECT ||--O| PMS_CODE : "N:N"
+PMS_PROJECT ||--O| PMS_COMPANY_REGISTRATION_MANAGEMENT : "N:N"
+PMS_PROJECT ||--O| PMS_DEPARTMENT : "N:N"
+PMS_MESSAGE_RECIPIENT_MAP ||--O| PMS_PROJECT : "N:N"
+PMS_PROJECT_CODE ||--O| PMS_CODE : "N:N"
+
+CHMM_CATEGORY_INFO ||--O{ CHMM_CODE_INFO : "N:N"
+CHMM_CODE_INFO ||--O{ CHMM_CODE_ITEM_INFO : "N:N"
+PMS_USER ||--O{ PMS_ANSWER : "N:N"
+PMS_QUESTION ||--O{ PMS_ANSWER : "N:N"
+PMS_MENU ||--O{ PMS_ANSWER : "N:N"
+PMS_USER ||--O{ PMS_BOARD : "N:N"
+PMS_MENU ||--O{ PMS_BOARD : "N:N"
+PMS_CODE ||--O{ PMS_BUTTON : "N:N"
+PMS_MENU_BUTTON_MAP ||--O{ PMS_BUTTON_ROLE_MAP : "N:N"
+PMS_USER ||--O{ PMS_BUTTON_ROLE_MAP : "N:N"
+
+PMS_USER ||--O{ PMS_MENU : "N:N"
+PMS_MENU ||--O{ PMS_MENU : "N:N"
+PMS_MENU ||--O{ PMS_CODE : "N:N"
+PMS_MENU ||--O{ PMS_MENU_BUTTON_MAP : "N:N"
+PMS_BUTTON ||--O{ PMS_MENU_BUTTON_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU_BUTTON_MAP : "N:N"
+PMS_MENU ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+PMS_USER ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+PMS_ROLE ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+
+PMS_USER ||--O{ PMS_GROUP : "N:N"
+PMS_CODE ||--O{ PMS_GROUP : "N:N"
+PMS_PROJECT ||--O{ PMS_GROUP : "N:N"
+PMS_USER_GROUP_MAP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_GROUP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_CODE ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_INPUT_PERSON ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_USER ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU : "N:N"
+
+PMS_USER ||--O| PMS_MENU : "N:N"
+PMS_MENU ||--O| PMS_MENU : "N:N"
+PMS_MENU ||--O| PMS_CODE : "N:N"
+PMS_MENU ||--O| PMS_MENU_BUTTON_MAP : "N:N"
+PMS_BUTTON ||--O| PMS_MENU_BUTTON_MAP : "N:N"
+PMS_PROJECT ||--O| PMS_MENU_BUTTON_MAP : "N:N"
+PMS_MENU ||--O| PMS_MENU_ROLE_MAP : "N:N"
+PMS_USER ||--O| PMS_MENU_ROLE_MAP : "N:N"
+PMS_ROLE ||--O| PMS_MENU_ROLE_MAP : "N:N"
+PMS_PROJECT ||--O| PMS_MENU_ROLE_MAP : "N:N"
+
+
+
+CHMM_CATEGORY_INFO ||--O{ CHMM_CODE_INFO : "N:N"
+CHMM_CODE_INFO ||--O{ CHMM_CODE_ITEM_INFO : "N:N"
+PMS_USER ||--O{ PMS_ANSWER : "N:N"
+PMS_QUESTION ||--O{ PMS_ANSWER : "N:N"
+PMS_MENU ||--O{ PMS_ANSWER : "N:N"
+PMS_USER ||--O{ PMS_BOARD : "N:N"
+PMS_MENU ||--O{ PMS_BOARD : "N:N"
+PMS_CODE ||--O{ PMS_BUTTON : "N:N"
+PMS_MENU_BUTTON_MAP ||--O{ PMS_BUTTON_ROLE_MAP : "N:N"
+PMS_USER ||--O{ PMS_BUTTON_ROLE_MAP : "N:N"
+
+
+
+PMS_BUTTON_ROLE_MAP }O--O{ PMS_ROLE : "N:N"
+PMS_BUTTON_ROLE_MAP }O--O{ PMS_PROJECT : "N:N"
+PMS_CODE }O--O{ PMS_USER : "N:N"
+PMS_CODE }O--O{ CHMM_CODE_ITEM_INFO : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT }O--O{ PMS_USER : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT }O--O{ PMS_CODE : "N:N"
+PMS_DEPARTMENT }O--O{ PMS_USER : "N:N"
+PMS_DEPARTMENT }O--O{ PMS_DEPARTMENT : "N:N"
+PMS_EXPORT_MANAGEMENT }O--O{ PMS_PROJECT : "N:N"
+PMS_EXPORT_MANAGEMENT }O--O{ PMS_USER : "N:N"
+
+PMS_USER ||--O{ PMS_GROUP : "N:N"
+PMS_CODE ||--O{ PMS_GROUP : "N:N"
+PMS_PROJECT ||--O{ PMS_GROUP : "N:N"
+PMS_USER_GROUP_MAP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_GROUP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_CODE ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_INPUT_PERSON ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_USER ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU : "N:N"
+
+PMS_BUTTON_ROLE_MAP }O--O{ PMS_ROLE : "N:N"
+PMS_BUTTON_ROLE_MAP }O--O{ PMS_PROJECT : "N:N"
+PMS_CODE }O--O{ PMS_USER : "N:N"
+PMS_CODE }O--O{ CHMM_CODE_ITEM_INFO : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT }O--O{ PMS_USER : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT }O--O{ PMS_CODE : "N:N"
+PMS_DEPARTMENT }O--O{ PMS_USER : "N:N"
+PMS_DEPARTMENT }O--O{ PMS_DEPARTMENT : "N:N"
+PMS_EXPORT_MANAGEMENT }O--O{ PMS_PROJECT : "N:N"
+PMS_EXPORT_MANAGEMENT }O--O{ PMS_USER : "N:N"
+
+PMS_USER ||--O{ PMS_GROUP : "N:N"
+PMS_CODE ||--O{ PMS_GROUP : "N:N"
+PMS_PROJECT ||--O{ PMS_GROUP : "N:N"
+PMS_USER_GROUP_MAP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_GROUP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_CODE ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_INPUT_PERSON ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_USER ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU : "N:N"
+
+CHMM_CODE_INFO ||--O{ CHMM_CATEGORY_INFO : "N:N"
+CHMM_CODE_ITEM_INFO ||--O{ CHMM_CODE_INFO : "N:N"
+PMS_ANSWER ||--O{ PMS_USER : "N:N"
+PMS_ANSWER ||--O{ PMS_QUESTION : "N:N"
+PMS_ANSWER ||--O{ PMS_MENU : "N:N"
+PMS_BOARD ||--O{ PMS_USER : "N:N"
+PMS_BOARD ||--O{ PMS_MENU : "N:N"
+PMS_BUTTON ||--O{ PMS_CODE : "N:N"
+PMS_BUTTON_ROLE_MAP ||--O{ PMS_MENU_BUTTON_MAP : "N:N"
+PMS_BUTTON_ROLE_MAP ||--O{ PMS_USER : "N:N"
+
+
+PMS_BUTTON {
+        bigint seq PK
+        varchar(255) id
+        varchar(255) code
+        varchar(255) description
+        varchar(255) name
+        bigint is_use_seq FK
+    }
+
+
+
+PMS_BUTTON_ROLE_MAP {
+        SEQ BigInt PK
+        CREATE_DATE_TIME DateTime(6)
+        UPDATE_DATE_TIME DateTime(6)
+        IS_MAP Bit(1)
+        CREATOR_SEQ BigInt FK
+        UPDATER_SEQ BigInt FK
+        MENU_BUTTON_SEQ BigInt FK
+        PROJECT_SEQ BigInt FK
+        ROLE_SEQ BigInt FK
+        IS_DEFAULT Bit(1)
+    }
+
+PMS_DESIGN {
+        bigint seq PK
+        datetime(6) create_date_time
+        varchar(80) output
+        datetime(6) plan_end_date
+        datetime(6) plan_start_date
+        datetime(6) real_end_date
+        datetime(6) real_start_date
+        varchar(30) status
+        datetime(6) update_datetime
+    }
+PMS_BUTTON_ROLE_MAP }O--O{ PMS_ROLE : "N:N"
+PMS_BUTTON_ROLE_MAP }O--O{ PMS_PROJECT : "N:N"
+PMS_CODE }O--O{ PMS_USER : "N:N"
+PMS_CODE }O--O{ CHMM_CODE_ITEM_INFO : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT }O--O{ PMS_USER : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT }O--O{ PMS_CODE : "N:N"
+PMS_DEPARTMENT }O--O{ PMS_USER : "N:N"
+PMS_DEPARTMENT }O--O{ PMS_DEPARTMENT : "N:N"
+PMS_EXPORT_MANAGEMENT }O--O{ PMS_PROJECT : "N:N"
+PMS_EXPORT_MANAGEMENT }O--O{ PMS_USER : "N:N"
+
+PMS_USER ||--O{ PMS_GROUP : "N:N"
+PMS_CODE ||--O{ PMS_GROUP : "N:N"
+PMS_PROJECT ||--O{ PMS_GROUP : "N:N"
+PMS_USER_GROUP_MAP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_GROUP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_CODE ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_INPUT_PERSON ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_USER ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU : "N:N"
+
+PMS_USER ||--O{ PMS_PROJECT_CODE : "N:N"
+CHMM_CODE_INFO ||--O{ PMS_PROJECT_CODE : "N:N"
+PMS_PROJECT ||--O{ PMS_PROJECT_CODE : "N:N"
+PMS_USER ||--O{ PMS_QUESTION : "N:N"
+PMS_MENU ||--O{ PMS_QUESTION : "N:N"
+PMS_PROJECT ||--O{ PMS_QUESTION : "N:N"
+PMS_CODE ||--O{ PMS_ROLE : "N:N"
+PMS_USER ||--O{ PMS_ROLE : "N:N"
+PMS_USER ||--O{ PMS_SPECIAL_DEPARTMENT : "N:N"
+PMS_CODE ||--O{ PMS_SPECIAL_DEPARTMENT : "N:N"
+
+PMS_USER ||--O{ PMS_GROUP : "N:N"
+PMS_CODE ||--O{ PMS_GROUP : "N:N"
+PMS_PROJECT ||--O{ PMS_GROUP : "N:N"
+PMS_USER_GROUP_MAP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_GROUP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_CODE ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_INPUT_PERSON ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_USER ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU : "N:N"
+
+CHMM_CATEGORY_INFO ||--O{ CHMM_CODE_INFO : "N:N"
+CHMM_CODE_INFO ||--O{ CHMM_CODE_ITEM_INFO : "N:N"
+PMS_USER ||--O{ PMS_ANSWER : "N:N"
+PMS_QUESTION ||--O{ PMS_ANSWER : "N:N"
+PMS_MENU ||--O{ PMS_ANSWER : "N:N"
+PMS_USER ||--O{ PMS_BOARD : "N:N"
+PMS_MENU ||--O{ PMS_BOARD : "N:N"
+PMS_CODE ||--O{ PMS_BUTTON : "N:N"
+PMS_MENU_BUTTON_MAP ||--O{ PMS_BUTTON_ROLE_MAP : "N:N"
+PMS_USER ||--O{ PMS_BUTTON_ROLE_MAP : "N:N"
+
+PMS_PROJECT_CODE ||--O{ PMS_USER : "N:N"
+PMS_PROJECT_CODE ||--O{ CHMM_CODE_INFO : "N:N"
+PMS_PROJECT_CODE ||--O{ PMS_PROJECT : "N:N"
+PMS_QUESTION ||--O{ PMS_USER : "N:N"
+PMS_QUESTION ||--O{ PMS_MENU : "N:N"
+PMS_QUESTION ||--O{ PMS_PROJECT : "N:N"
+PMS_ROLE ||--O{ PMS_CODE : "N:N"
+PMS_ROLE ||--O{ PMS_USER : "N:N"
+PMS_SPECIAL_DEPARTMENT ||--O{ PMS_USER : "N:N"
+PMS_SPECIAL_DEPARTMENT ||--O{ PMS_CODE : "N:N"
+
+PMS_BUTTON_ROLE_MAP }O--O{ PMS_ROLE : "N:N"
+PMS_BUTTON_ROLE_MAP }O--O{ PMS_PROJECT : "N:N"
+PMS_CODE }O--O{ PMS_USER : "N:N"
+PMS_CODE }O--O{ CHMM_CODE_ITEM_INFO : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT }O--O{ PMS_USER : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT }O--O{ PMS_CODE : "N:N"
+PMS_DEPARTMENT }O--O{ PMS_USER : "N:N"
+PMS_DEPARTMENT }O--O{ PMS_DEPARTMENT : "N:N"
+PMS_EXPORT_MANAGEMENT }O--O{ PMS_PROJECT : "N:N"
+PMS_EXPORT_MANAGEMENT }O--O{ PMS_USER : "N:N"
+
+PMS_PROJECT_CODE ||--O| PMS_USER : "N:N"
+PMS_PROJECT_CODE ||--O| CHMM_CODE_INFO : "N:N"
+PMS_PROJECT_CODE ||--O| PMS_PROJECT : "N:N"
+PMS_QUESTION ||--O| PMS_USER : "N:N"
+PMS_QUESTION ||--O| PMS_MENU : "N:N"
+PMS_QUESTION ||--O| PMS_PROJECT : "N:N"
+PMS_ROLE ||--O| PMS_CODE : "N:N"
+PMS_ROLE ||--O| PMS_USER : "N:N"
+PMS_SPECIAL_DEPARTMENT ||--O| PMS_USER : "N:N"
+PMS_SPECIAL_DEPARTMENT ||--O| PMS_CODE : "N:N"
+
+
+PMS_MENU_ROLE_MAP {
+        SEQ BigInt PK
+        CREATE_DATE_TIME DateTime(6)
+        UPDATE_DATE_TIME DateTime(6)
+        IS_MAP Bit(1)
+        CREATOR_SEQ BigInt FK
+        UPDATER_SEQ BigInt FK
+        MENU_SEQ BigInt FK
+        PROJECT_SEQ BigInt FK
+        ROLE_SEQ BigInt FK
+        IS_DEFAULT Bit(1)
+    }
+PMS_USER ||--O{ PMS_MESSAGE : "N:N"
+PMS_USER ||--O{ PMS_PROJECT : "N:N"
+PMS_USER ||--O{ PMS_MESSAGE_RECIPIENT_MAP : "N:N"
+PMS_MESSAGE ||--O{ PMS_PROJECT : "N:N"
+PMS_MESSAGE ||--O{ PMS_MESSAGE_RECIPIENT_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_CODE : "N:N"
+PMS_PROJECT ||--O{ PMS_COMPANY_REGISTRATION_MANAGEMENT : "N:N"
+PMS_PROJECT ||--O{ PMS_DEPARTMENT : "N:N"
+PMS_MESSAGE_RECIPIENT_MAP ||--O{ PMS_PROJECT : "N:N"
+PMS_PROJECT_CODE ||--O{ PMS_CODE : "N:N"
+
+PMS_USER ||--O{ PMS_MENU : "N:N"
+PMS_MENU ||--O{ PMS_MENU : "N:N"
+PMS_MENU ||--O{ PMS_CODE : "N:N"
+PMS_MENU ||--O{ PMS_MENU_BUTTON_MAP : "N:N"
+PMS_BUTTON ||--O{ PMS_MENU_BUTTON_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU_BUTTON_MAP : "N:N"
+PMS_MENU ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+PMS_USER ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+PMS_ROLE ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+
+PMS_USER ||--O{ PMS_GROUP : "N:N"
+PMS_CODE ||--O{ PMS_GROUP : "N:N"
+PMS_PROJECT ||--O{ PMS_GROUP : "N:N"
+PMS_USER_GROUP_MAP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_GROUP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_CODE ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_INPUT_PERSON ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_USER ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU : "N:N"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CHMM_CATEGORY_INFO ||--O{ CHMM_CODE_INFO : "N:N"
+CHMM_CODE_INFO ||--O{ CHMM_CODE_ITEM_INFO : "N:N"
+PMS_USER ||--O{ PMS_ANSWER : "N:N"
+PMS_QUESTION ||--O{ PMS_ANSWER : "N:N"
+PMS_MENU ||--O{ PMS_ANSWER : "N:N"
+PMS_USER ||--O{ PMS_BOARD : "N:N"
+PMS_MENU ||--O{ PMS_BOARD : "N:N"
+PMS_CODE ||--O{ PMS_BUTTON : "N:N"
+PMS_MENU_BUTTON_MAP ||--O{ PMS_BUTTON_ROLE_MAP : "N:N"
+PMS_USER ||--O{ PMS_BUTTON_ROLE_MAP : "N:N"
+
+
+
+
+PMS_MESSAGE {
+        bigint seq PK
+        datetime(6) create_date_time
+        datetime(6) update_date_time
+        mediumblob content
+        bit(1) is_stored
+        bit(1) is_use
+        varchar(255) title
+        bigint creator_seq FK
+        bigint updater_seq FK
+        bigint project_seq FK
+    }
+
+PMS_INPUT_PERSON {
+        bigint seq PK
+        datetime(6) create_date_time
+        datetime(6) update_date_time
+        varchar(330) note
+        bigint order_number
+        date plan_end_date
+        date plan_start_date
+        date real_end_date
+        date real_start_date
+        varchar(30) role
+        varchar(30) task
+        bigint view_id
+        bigint creator_seq FK
+        bigint updater_seq FK
+        bigint field_seq FK
+        bigint is_participated_seq FK
+        bigint project_seq FK
+        bigint tech_grade_seq FK
+        bigint user_seq FK
+        bigint input_person_seq FK
+        text dynamic_extra_field11
+        text dynamic_extra_field12
+        text dynamic_extra_field13
+        text dynamic_extra_field14
+        text dynamic_extra_field15
+        text dynamic_extra_field16
+        text dynamic_extra_field17
+        text dynamic_extra_field18
+        text dynamic_extra_field19
+        text dynamic_extra_field20
+        text dynamic_extra_field01
+        text dynamic_extra_field02
+        text dynamic_extra_field03
+        text dynamic_extra_field04
+        text dynamic_extra_field05
+        text dynamic_extra_field06
+        text dynamic_extra_field07
+        text dynamic_extra_field08
+        text dynamic_extra_field09
+        text dynamic_extra_field10
+    }
+
+PMS_PROJECT_CODE {
+        bigint seq PK
+        datetime(6) create_date_time
+        datetime(6) update_date_time
+        varchar(255) code
+        varchar(255) description
+        varchar(255) name
+        bigint order_num
+        bigint creator_seq FK
+        bigint updater_seq FK
+        varchar(255) category_id FK
+        varchar(255) code_id FK
+        bigint is_use_seq FK
+        bigint project_seq FK
+    }
+
+PMS_PROJECT {
+        SEQ bigint PK
+        CUSTOMER_NAME varchar(255)
+        IS_DELETE bit(1)
+        NAME varchar(255)
+        NOTE varchar(255)
+        OPEN_DATE datetime(6)
+        PLAN_END_DATE datetime(6)
+        PLAN_START_DATE datetime(6)
+        REAL_END_DATE datetime(6)
+        PREFIX varchar(255)
+        SAP_PROJECT_ID varchar(255)
+        DEPARTMENT_DEPT_ID varchar(5) FK
+        PM_SEQ bigint FK
+        SALES_USER_SEQ bigint FK
+        STATUS_SEQ bigint FK
+        TEAM_DEPT_ID varchar(5) FK
+        TYPE_SEQ bigint FK
+        WEEKLY_REPORT_DAY_CODE_SEQ bigint FK
+        UPDATER_SEQ bigint FK
+        CREATOR_SEQ bigint FK
+        CREATE_DATE_TIME datetime(6)
+        UPDATE_DATE_TIME datetime(6)
+        CONSTRUCTION_AMOUNT bigint
+        CONTRACT_AMOUNT bigint
+        EXECUTION_POSITION varchar(255)
+        SAFETY_HEALTH_MANAGEMENT_EXPENSES bigint
+        NUMBER_OF_RISK_CONDUCT int
+        RISK_EVALUATION_TYPE varchar(100)
+        PHASE_SEQ bigint FK
+        DIVISION_DEPT_ID varchar(5) FK
+        ADDRESS varchar(255)
+        ADDRESS_DETAIL varchar(255)
+        IS_IMPLEMENTATION_COST tinyint(1)
+        IS_INTELLECTUAL_PROPERTY_RIGHT tinyint(1)
+        IS_LICENSE tinyint(1)
+        IS_VIEW_AFTER_COMPLETION tinyint(1)
+        COMPANY_SEQ bigint FK
+        CUSTOMER_COMPANY_SEQ bigint FK
+        REMARK varchar(100)
+    }
+PMS_USER ||--O{ PMS_MESSAGE : "N:N"
+PMS_USER ||--O{ PMS_PROJECT : "N:N"
+PMS_USER ||--O{ PMS_MESSAGE_RECIPIENT_MAP : "N:N"
+PMS_MESSAGE ||--O{ PMS_PROJECT : "N:N"
+PMS_MESSAGE ||--O{ PMS_MESSAGE_RECIPIENT_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_CODE : "N:N"
+PMS_PROJECT ||--O{ PMS_COMPANY_REGISTRATION_MANAGEMENT : "N:N"
+PMS_PROJECT ||--O{ PMS_DEPARTMENT : "N:N"
+PMS_PROJECT_CODE ||--O{ PMS_CODE : "N:N"
+
+PMS_USER ||--O{ PMS_MESSAGE : "N:N"
+PMS_USER ||--O{ PMS_PROJECT : "N:N"
+PMS_USER ||--O{ PMS_MESSAGE_RECIPIENT_MAP : "N:N"
+PMS_MESSAGE ||--O{ PMS_PROJECT : "N:N"
+PMS_MESSAGE ||--O{ PMS_MESSAGE_RECIPIENT_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_CODE : "N:N"
+PMS_PROJECT ||--O{ PMS_COMPANY_REGISTRATION_MANAGEMENT : "N:N"
+PMS_PROJECT ||--O{ PMS_DEPARTMENT : "N:N"
+PMS_MESSAGE_RECIPIENT_MAP ||--O{ PMS_PROJECT : "N:N"
+PMS_PROJECT_CODE ||--O{ PMS_CODE : "N:N"
+
+PMS_PROJECT ||--O{ PMS_TASK : "N:N"
+PMS_CODE ||--O{ PMS_TASK : "N:N"
+PMS_USER ||--O{ PMS_TASK : "N:N"
+PMS_USER ||--O{ PMS_TEMPLATE : "N:N"
+PMS_CODE ||--O{ PMS_TEMPLATE : "N:N"
+PMS_GROUP ||--O{ PMS_USER_GROUP_MAP : "N:N"
+PMS_USER_PROJECT_MAP ||--O{ PMS_USER_GROUP_MAP : "N:N"
+PMS_GROUP ||--O{ PMS_USER_GROUP_ROLE_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_USER_GROUP_ROLE_MAP : "N:N"
+PMS_USER ||--O{ PMS_USER_GROUP_ROLE_MAP : "N:N"
+
+PMS_USER ||--O{ PMS_GROUP : "N:N"
+PMS_CODE ||--O{ PMS_GROUP : "N:N"
+PMS_PROJECT ||--O{ PMS_GROUP : "N:N"
+PMS_USER_GROUP_MAP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_GROUP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_CODE ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_INPUT_PERSON ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_USER ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU : "N:N"
+
+PMS_TASK ||--|| PMS_PROJECT : "N:N"
+PMS_TASK ||--|| PMS_CODE : "N:N"
+PMS_TASK ||--|| PMS_USER : "N:N"
+PMS_TEMPLATE ||--|| PMS_USER : "N:N"
+PMS_TEMPLATE ||--|| PMS_CODE : "N:N"
+PMS_USER_GROUP_MAP ||--|| PMS_GROUP : "N:N"
+PMS_USER_GROUP_MAP ||--|| PMS_USER_PROJECT_MAP : "N:N"
+PMS_USER_GROUP_ROLE_MAP ||--|| PMS_GROUP : "N:N"
+PMS_USER_GROUP_ROLE_MAP ||--|| PMS_PROJECT : "N:N"
+PMS_USER_GROUP_ROLE_MAP ||--|| PMS_USER : "N:N"
+
+
+PMS_MESSAGE_RECIPIENT_MAP {
+        SEQ bigint PK
+        CREATE_DATE_TIME datetime(6)
+        UPDATE_DATE_TIME datetime(6)
+        IS_STORED bit(1)
+        IS_USE bit(1)
+        READ_DATETIME datetime(6)
+        CREATOR_SEQ bigint FK
+        UPDATER_SEQ bigint FK
+        MESSAGE_SEQ bigint FK
+        USER_SEQ bigint FK
+        PROJECT_SEQ bigint FK
+    }
+PMS_USER ||--O{ PMS_GROUP : "N:N"
+PMS_CODE ||--O{ PMS_GROUP : "N:N"
+PMS_PROJECT ||--O{ PMS_GROUP : "N:N"
+PMS_USER_GROUP_MAP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_GROUP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_CODE ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_INPUT_PERSON ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_USER ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU : "N:N"
+
+PMS_USER ||--O{ PMS_GROUP : "N:N"
+PMS_CODE ||--O{ PMS_GROUP : "N:N"
+PMS_PROJECT ||--O{ PMS_GROUP : "N:N"
+PMS_USER_GROUP_MAP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_GROUP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_CODE ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_INPUT_PERSON ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_USER ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU : "N:N"
+
+PMS_BUTTON_ROLE_MAP }|--|| PMS_ROLE : "N:N"
+PMS_BUTTON_ROLE_MAP }|--|| PMS_PROJECT : "N:N"
+PMS_CODE }|--|| PMS_USER : "N:N"
+PMS_CODE }|--|| CHMM_CODE_ITEM_INFO : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT }|--|| PMS_USER : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT }|--|| PMS_CODE : "N:N"
+PMS_DEPARTMENT }|--|| PMS_USER : "N:N"
+PMS_DEPARTMENT }|--|| PMS_DEPARTMENT : "N:N"
+PMS_EXPORT_MANAGEMENT }|--|| PMS_PROJECT : "N:N"
+PMS_EXPORT_MANAGEMENT }|--|| PMS_USER : "N:N"
+
+PMS_USER ||--O{ PMS_GROUP : "N:N"
+PMS_CODE ||--O{ PMS_GROUP : "N:N"
+PMS_PROJECT ||--O{ PMS_GROUP : "N:N"
+PMS_USER_GROUP_MAP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_GROUP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_CODE ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_INPUT_PERSON ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_USER ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU : "N:N"
+
+PMS_USER ||--O{ PMS_MESSAGE : "N:N"
+PMS_PROJECT ||--O{ PMS_MESSAGE : "N:N"
+PMS_MESSAGE ||--O{ PMS_MESSAGE_RECIPIENT_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_MESSAGE_RECIPIENT_MAP : "N:N"
+PMS_USER ||--O{ PMS_MESSAGE_RECIPIENT_MAP : "N:N"
+PMS_USER ||--O{ PMS_PROJECT : "N:N"
+PMS_CODE ||--O{ PMS_PROJECT : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT ||--O{ PMS_PROJECT : "N:N"
+PMS_DEPARTMENT ||--O{ PMS_PROJECT : "N:N"
+PMS_CODE ||--O{ PMS_PROJECT_CODE : "N:N"
+
+PMS_USER ||--O{ PMS_MENU : "N:N"
+PMS_MENU ||--O{ PMS_MENU : "N:N"
+PMS_MENU ||--O{ PMS_CODE : "N:N"
+PMS_MENU ||--O{ PMS_MENU_BUTTON_MAP : "N:N"
+PMS_BUTTON ||--O{ PMS_MENU_BUTTON_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU_BUTTON_MAP : "N:N"
+PMS_MENU ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+PMS_USER ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+PMS_ROLE ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+
+CHMM_CATEGORY_INFO ||--O{ CHMM_CODE_INFO : "N:N"
+CHMM_CODE_INFO ||--O{ CHMM_CODE_ITEM_INFO : "N:N"
+PMS_USER ||--O{ PMS_ANSWER : "N:N"
+PMS_QUESTION ||--O{ PMS_ANSWER : "N:N"
+PMS_MENU ||--O{ PMS_ANSWER : "N:N"
+PMS_USER ||--O{ PMS_BOARD : "N:N"
+PMS_MENU ||--O{ PMS_BOARD : "N:N"
+PMS_CODE ||--O{ PMS_BUTTON : "N:N"
+PMS_MENU_BUTTON_MAP ||--O{ PMS_BUTTON_ROLE_MAP : "N:N"
+PMS_USER ||--O{ PMS_BUTTON_ROLE_MAP : "N:N"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CHMM_CODE_INFO ||--|| CHMM_CATEGORY_INFO : "N:N"
+CHMM_CODE_ITEM_INFO ||--|| CHMM_CODE_INFO : "N:N"
+PMS_ANSWER ||--|| PMS_USER : "N:N"
+PMS_ANSWER ||--|| PMS_QUESTION : "N:N"
+PMS_ANSWER ||--|| PMS_MENU : "N:N"
+PMS_BOARD ||--|| PMS_USER : "N:N"
+PMS_BOARD ||--|| PMS_MENU : "N:N"
+PMS_BUTTON ||--|| PMS_CODE : "N:N"
+PMS_BUTTON_ROLE_MAP ||--|| PMS_MENU_BUTTON_MAP : "N:N"
+PMS_BUTTON_ROLE_MAP ||--|| PMS_USER : "N:N"
+
+PMS_PROJECT_CODE ||--|| PMS_USER : "N:N"
+PMS_PROJECT_CODE ||--|| CHMM_CODE_INFO : "N:N"
+PMS_PROJECT_CODE ||--|| PMS_PROJECT : "N:N"
+PMS_QUESTION ||--|| PMS_USER : "N:N"
+PMS_QUESTION ||--|| PMS_MENU : "N:N"
+PMS_QUESTION ||--|| PMS_PROJECT : "N:N"
+PMS_ROLE ||--|| PMS_CODE : "N:N"
+PMS_ROLE ||--|| PMS_USER : "N:N"
+PMS_SPECIAL_DEPARTMENT ||--|| PMS_USER : "N:N"
+PMS_SPECIAL_DEPARTMENT ||--|| PMS_CODE : "N:N"
+
+
+
+CHMM_CODE_INFO ||--|| CHMM_CATEGORY_INFO : "N:N"
+CHMM_CODE_ITEM_INFO ||--|| CHMM_CODE_INFO : "N:N"
+PMS_ANSWER ||--|| PMS_USER : "N:N"
+PMS_ANSWER ||--|| PMS_QUESTION : "N:N"
+PMS_ANSWER ||--|| PMS_MENU : "N:N"
+PMS_BOARD ||--|| PMS_USER : "N:N"
+PMS_BOARD ||--|| PMS_MENU : "N:N"
+PMS_BUTTON ||--|| PMS_CODE : "N:N"
+PMS_BUTTON_ROLE_MAP ||--|| PMS_MENU_BUTTON_MAP : "N:N"
+PMS_BUTTON_ROLE_MAP ||--|| PMS_USER : "N:N"
+
+PMS_PROJECT_CODE ||--O{ PMS_USER : "N:N"
+PMS_PROJECT_CODE ||--O{ CHMM_CODE_INFO : "N:N"
+PMS_PROJECT_CODE ||--O{ PMS_PROJECT : "N:N"
+PMS_QUESTION ||--O{ PMS_USER : "N:N"
+PMS_QUESTION ||--O{ PMS_MENU : "N:N"
+PMS_QUESTION ||--O{ PMS_PROJECT : "N:N"
+PMS_ROLE ||--O{ PMS_CODE : "N:N"
+PMS_ROLE ||--O{ PMS_USER : "N:N"
+PMS_SPECIAL_DEPARTMENT ||--O{ PMS_USER : "N:N"
+PMS_SPECIAL_DEPARTMENT ||--O{ PMS_CODE : "N:N"
+
+PMS_ROLE ||--O| PMS_USER_GROUP_ROLE_MAP : "N:N"
+
+
+
+PMS_USER ||--O{ PMS_GROUP : "N:N"
+PMS_CODE ||--O{ PMS_GROUP : "N:N"
+PMS_PROJECT ||--O{ PMS_GROUP : "N:N"
+PMS_USER_GROUP_MAP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_GROUP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_CODE ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_INPUT_PERSON ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_USER ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU : "N:N"
+
+PMS_USER ||--O{ PMS_MENU : "N:N"
+PMS_MENU ||--O{ PMS_MENU : "N:N"
+PMS_MENU ||--O{ PMS_CODE : "N:N"
+PMS_MENU ||--O{ PMS_MENU_BUTTON_MAP : "N:N"
+PMS_BUTTON ||--O{ PMS_MENU_BUTTON_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU_BUTTON_MAP : "N:N"
+PMS_MENU ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+PMS_USER ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+PMS_ROLE ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+
+PMS_PROJECT_CODE ||--O| PMS_USER : "N:N"
+PMS_PROJECT_CODE ||--O| CHMM_CODE_INFO : "N:N"
+PMS_PROJECT_CODE ||--O| PMS_PROJECT : "N:N"
+PMS_QUESTION ||--O| PMS_USER : "N:N"
+PMS_QUESTION ||--O| PMS_MENU : "N:N"
+PMS_QUESTION ||--O| PMS_PROJECT : "N:N"
+PMS_ROLE ||--O| PMS_CODE : "N:N"
+PMS_ROLE ||--O| PMS_USER : "N:N"
+PMS_SPECIAL_DEPARTMENT ||--O| PMS_USER : "N:N"
+PMS_SPECIAL_DEPARTMENT ||--O| PMS_CODE : "N:N"
+
+PMS_USER ||--O| PMS_PROJECT_CODE : "N:N"
+CHMM_CODE_INFO ||--O| PMS_PROJECT_CODE : "N:N"
+PMS_PROJECT ||--O| PMS_PROJECT_CODE : "N:N"
+PMS_USER ||--O| PMS_QUESTION : "N:N"
+PMS_MENU ||--O| PMS_QUESTION : "N:N"
+PMS_PROJECT ||--O| PMS_QUESTION : "N:N"
+PMS_CODE ||--O| PMS_ROLE : "N:N"
+PMS_USER ||--O| PMS_ROLE : "N:N"
+PMS_USER ||--O| PMS_SPECIAL_DEPARTMENT : "N:N"
+PMS_CODE ||--O| PMS_SPECIAL_DEPARTMENT : "N:N"
+
+PMS_USER ||--O{ PMS_PROJECT_CODE : "N:N"
+CHMM_CODE_INFO ||--O{ PMS_PROJECT_CODE : "N:N"
+PMS_PROJECT ||--O{ PMS_PROJECT_CODE : "N:N"
+PMS_USER ||--O{ PMS_QUESTION : "N:N"
+PMS_MENU ||--O{ PMS_QUESTION : "N:N"
+PMS_PROJECT ||--O{ PMS_QUESTION : "N:N"
+PMS_CODE ||--O{ PMS_ROLE : "N:N"
+PMS_USER ||--O{ PMS_ROLE : "N:N"
+PMS_USER ||--O{ PMS_SPECIAL_DEPARTMENT : "N:N"
+PMS_CODE ||--O{ PMS_SPECIAL_DEPARTMENT : "N:N"
+
+PMS_USER ||--O{ PMS_MESSAGE : "N:N"
+PMS_USER ||--O{ PMS_PROJECT : "N:N"
+PMS_USER ||--O{ PMS_MESSAGE_RECIPIENT_MAP : "N:N"
+PMS_MESSAGE ||--O{ PMS_PROJECT : "N:N"
+PMS_MESSAGE ||--O{ PMS_MESSAGE_RECIPIENT_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_CODE : "N:N"
+PMS_PROJECT ||--O{ PMS_COMPANY_REGISTRATION_MANAGEMENT : "N:N"
+PMS_PROJECT ||--O{ PMS_DEPARTMENT : "N:N"
+PMS_PROJECT_CODE ||--O{ PMS_CODE : "N:N"
+
+PMS_BUTTON_ROLE_MAP }O--O{ PMS_ROLE : "N:N"
+PMS_BUTTON_ROLE_MAP }O--O{ PMS_PROJECT : "N:N"
+PMS_CODE }O--O{ PMS_USER : "N:N"
+PMS_CODE }O--O{ CHMM_CODE_ITEM_INFO : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT }O--O{ PMS_USER : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT }O--O{ PMS_CODE : "N:N"
+PMS_DEPARTMENT }O--O{ PMS_USER : "N:N"
+PMS_DEPARTMENT }O--O{ PMS_DEPARTMENT : "N:N"
+PMS_EXPORT_MANAGEMENT }O--O{ PMS_PROJECT : "N:N"
+PMS_EXPORT_MANAGEMENT }O--O{ PMS_USER : "N:N"
+
+CHMM_CODE_INFO ||--|| CHMM_CATEGORY_INFO : "N:N"
+CHMM_CODE_ITEM_INFO ||--|| CHMM_CODE_INFO : "N:N"
+PMS_ANSWER ||--|| PMS_USER : "N:N"
+PMS_ANSWER ||--|| PMS_QUESTION : "N:N"
+PMS_ANSWER ||--|| PMS_MENU : "N:N"
+PMS_BOARD ||--|| PMS_USER : "N:N"
+PMS_BOARD ||--|| PMS_MENU : "N:N"
+PMS_BUTTON ||--|| PMS_CODE : "N:N"
+PMS_BUTTON_ROLE_MAP ||--|| PMS_MENU_BUTTON_MAP : "N:N"
+PMS_BUTTON_ROLE_MAP ||--|| PMS_USER : "N:N"
+
+CHMM_CODE_INFO ||--|| CHMM_CATEGORY_INFO : "N:N"
+CHMM_CODE_ITEM_INFO ||--|| CHMM_CODE_INFO : "N:N"
+PMS_ANSWER ||--|| PMS_USER : "N:N"
+PMS_ANSWER ||--|| PMS_QUESTION : "N:N"
+PMS_ANSWER ||--|| PMS_MENU : "N:N"
+PMS_BOARD ||--|| PMS_USER : "N:N"
+PMS_BOARD ||--|| PMS_MENU : "N:N"
+PMS_BUTTON ||--|| PMS_CODE : "N:N"
+PMS_BUTTON_ROLE_MAP ||--|| PMS_MENU_BUTTON_MAP : "N:N"
+PMS_BUTTON_ROLE_MAP ||--|| PMS_USER : "N:N"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+PMS_USER ||--O{ PMS_MESSAGE : "N:N"
+PMS_PROJECT ||--O{ PMS_MESSAGE : "N:N"
+PMS_MESSAGE ||--O{ PMS_MESSAGE_RECIPIENT_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_MESSAGE_RECIPIENT_MAP : "N:N"
+PMS_USER ||--O{ PMS_MESSAGE_RECIPIENT_MAP : "N:N"
+PMS_USER ||--O{ PMS_PROJECT : "N:N"
+PMS_CODE ||--O{ PMS_PROJECT : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT ||--O{ PMS_PROJECT : "N:N"
+PMS_DEPARTMENT ||--O{ PMS_PROJECT : "N:N"
+PMS_CODE ||--O{ PMS_PROJECT_CODE : "N:N"
+
+
+
+
+
+
+
+
+
+PMS_USER_GROUP_ROLE_MAP }O--|| PMS_ROLE : "N:N"
+
+PMS_BUTTON_ROLE_MAP }O--O{ PMS_ROLE : "N:N"
+PMS_BUTTON_ROLE_MAP }O--O{ PMS_PROJECT : "N:N"
+PMS_CODE }O--O{ PMS_USER : "N:N"
+PMS_CODE }O--O{ CHMM_CODE_ITEM_INFO : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT }O--O{ PMS_USER : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT }O--O{ PMS_CODE : "N:N"
+PMS_DEPARTMENT }O--O{ PMS_USER : "N:N"
+PMS_DEPARTMENT }O--O{ PMS_DEPARTMENT : "N:N"
+PMS_EXPORT_MANAGEMENT }O--O{ PMS_PROJECT : "N:N"
+PMS_EXPORT_MANAGEMENT }O--O{ PMS_USER : "N:N"
+
+PMS_USER ||--O{ PMS_GROUP : "N:N"
+PMS_CODE ||--O{ PMS_GROUP : "N:N"
+PMS_PROJECT ||--O{ PMS_GROUP : "N:N"
+PMS_USER_GROUP_MAP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_GROUP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_CODE ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_INPUT_PERSON ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_USER ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU : "N:N"
+
+PMS_USER ||--O{ PMS_GROUP : "N:N"
+PMS_CODE ||--O{ PMS_GROUP : "N:N"
+PMS_PROJECT ||--O{ PMS_GROUP : "N:N"
+PMS_USER_GROUP_MAP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_GROUP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_CODE ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_INPUT_PERSON ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_USER ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU : "N:N"
+
+PMS_USER ||--O{ PMS_GROUP : "N:N"
+PMS_CODE ||--O{ PMS_GROUP : "N:N"
+PMS_PROJECT ||--O{ PMS_GROUP : "N:N"
+PMS_USER_GROUP_MAP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_GROUP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_CODE ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_INPUT_PERSON ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_USER ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU : "N:N"
+
+
+
+PMS_PROJECT_CODE ||--O| PMS_USER : "N:N"
+PMS_PROJECT_CODE ||--O| CHMM_CODE_INFO : "N:N"
+PMS_PROJECT_CODE ||--O| PMS_PROJECT : "N:N"
+PMS_QUESTION ||--O| PMS_USER : "N:N"
+PMS_QUESTION ||--O| PMS_MENU : "N:N"
+PMS_QUESTION ||--O| PMS_PROJECT : "N:N"
+PMS_ROLE ||--O| PMS_CODE : "N:N"
+PMS_ROLE ||--O| PMS_USER : "N:N"
+PMS_SPECIAL_DEPARTMENT ||--O| PMS_USER : "N:N"
+PMS_SPECIAL_DEPARTMENT ||--O| PMS_CODE : "N:N"
+
+PMS_USER ||--O{ PMS_MESSAGE : "N:N"
+PMS_PROJECT ||--O{ PMS_MESSAGE : "N:N"
+PMS_MESSAGE ||--O{ PMS_MESSAGE_RECIPIENT_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_MESSAGE_RECIPIENT_MAP : "N:N"
+PMS_USER ||--O{ PMS_MESSAGE_RECIPIENT_MAP : "N:N"
+PMS_USER ||--O{ PMS_PROJECT : "N:N"
+PMS_CODE ||--O{ PMS_PROJECT : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT ||--O{ PMS_PROJECT : "N:N"
+PMS_DEPARTMENT ||--O{ PMS_PROJECT : "N:N"
+PMS_CODE ||--O{ PMS_PROJECT_CODE : "N:N"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+PMS_USER ||--O{ PMS_MENU : "N:N"
+PMS_MENU ||--O{ PMS_MENU : "N:N"
+PMS_MENU ||--O{ PMS_CODE : "N:N"
+PMS_MENU ||--O{ PMS_MENU_BUTTON_MAP : "N:N"
+PMS_BUTTON ||--O{ PMS_MENU_BUTTON_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU_BUTTON_MAP : "N:N"
+PMS_MENU ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+PMS_USER ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+PMS_ROLE ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+
+PMS_ROLE ||--O| PMS_USER_GROUP_ROLE_MAP : "N:N"
+
+PMS_USER ||--O{ PMS_GROUP : "N:N"
+PMS_CODE ||--O{ PMS_GROUP : "N:N"
+PMS_PROJECT ||--O{ PMS_GROUP : "N:N"
+PMS_USER_GROUP_MAP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_GROUP ||--O{ PMS_GROUP_PMS_USER_GROUP_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_CODE ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_INPUT_PERSON ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_USER ||--O{ PMS_INPUT_PERSON : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU : "N:N"
+
+
+
+
+
+
+
+
+
+
+
+PMS_USER ||--O{ PMS_MENU : "N:N"
+PMS_MENU ||--O{ PMS_MENU : "N:N"
+PMS_MENU ||--O{ PMS_CODE : "N:N"
+PMS_MENU ||--O{ PMS_MENU_BUTTON_MAP : "N:N"
+PMS_BUTTON ||--O{ PMS_MENU_BUTTON_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU_BUTTON_MAP : "N:N"
+PMS_MENU ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+PMS_USER ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+PMS_ROLE ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+
+
+
+PMS_PROJECT ||--O| PMS_TASK : "N:N"
+PMS_CODE ||--O| PMS_TASK : "N:N"
+PMS_USER ||--O| PMS_TASK : "N:N"
+PMS_USER ||--O| PMS_TEMPLATE : "N:N"
+PMS_CODE ||--O| PMS_TEMPLATE : "N:N"
+PMS_GROUP ||--O| PMS_USER_GROUP_MAP : "N:N"
+PMS_USER_PROJECT_MAP ||--O| PMS_USER_GROUP_MAP : "N:N"
+PMS_GROUP ||--O| PMS_USER_GROUP_ROLE_MAP : "N:N"
+PMS_PROJECT ||--O| PMS_USER_GROUP_ROLE_MAP : "N:N"
+PMS_USER ||--O| PMS_USER_GROUP_ROLE_MAP : "N:N"
+
+PMS_USER ||--O{ PMS_MESSAGE : "N:N"
+PMS_PROJECT ||--O{ PMS_MESSAGE : "N:N"
+PMS_MESSAGE ||--O{ PMS_MESSAGE_RECIPIENT_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_MESSAGE_RECIPIENT_MAP : "N:N"
+PMS_USER ||--O{ PMS_MESSAGE_RECIPIENT_MAP : "N:N"
+PMS_USER ||--O{ PMS_PROJECT : "N:N"
+PMS_CODE ||--O{ PMS_PROJECT : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT ||--O{ PMS_PROJECT : "N:N"
+PMS_DEPARTMENT ||--O{ PMS_PROJECT : "N:N"
+PMS_CODE ||--O{ PMS_PROJECT_CODE : "N:N"
+
+PMS_PROJECT_CODE ||--O{ PMS_USER : "N:N"
+PMS_PROJECT_CODE ||--O{ CHMM_CODE_INFO : "N:N"
+PMS_PROJECT_CODE ||--O{ PMS_PROJECT : "N:N"
+PMS_QUESTION ||--O{ PMS_USER : "N:N"
+PMS_QUESTION ||--O{ PMS_MENU : "N:N"
+PMS_QUESTION ||--O{ PMS_PROJECT : "N:N"
+PMS_ROLE ||--O{ PMS_CODE : "N:N"
+PMS_ROLE ||--O{ PMS_USER : "N:N"
+PMS_SPECIAL_DEPARTMENT ||--O{ PMS_USER : "N:N"
+PMS_SPECIAL_DEPARTMENT ||--O{ PMS_CODE : "N:N"
+
+PMS_USER ||--O{ PMS_MENU : "N:N"
+PMS_MENU ||--O{ PMS_MENU : "N:N"
+PMS_MENU ||--O{ PMS_CODE : "N:N"
+PMS_MENU ||--O{ PMS_MENU_BUTTON_MAP : "N:N"
+PMS_BUTTON ||--O{ PMS_MENU_BUTTON_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU_BUTTON_MAP : "N:N"
+PMS_MENU ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+PMS_USER ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+PMS_ROLE ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_MENU_ROLE_MAP : "N:N"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+PMS_USER ||--O{ PMS_MESSAGE : "N:N"
+PMS_PROJECT ||--O{ PMS_MESSAGE : "N:N"
+PMS_MESSAGE ||--O{ PMS_MESSAGE_RECIPIENT_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_MESSAGE_RECIPIENT_MAP : "N:N"
+PMS_USER ||--O{ PMS_MESSAGE_RECIPIENT_MAP : "N:N"
+PMS_USER ||--O{ PMS_PROJECT : "N:N"
+PMS_CODE ||--O{ PMS_PROJECT : "N:N"
+PMS_COMPANY_REGISTRATION_MANAGEMENT ||--O{ PMS_PROJECT : "N:N"
+PMS_DEPARTMENT ||--O{ PMS_PROJECT : "N:N"
+PMS_CODE ||--O{ PMS_PROJECT_CODE : "N:N"
+
+PMS_ROLE ||--O| PMS_USER_GROUP_ROLE_MAP : "N:N"
+
+PMS_ROLE ||--O| PMS_USER_GROUP_ROLE_MAP : "N:N"
+
+
+
+
+
+PMS_PROJECT_CODE ||--O| PMS_USER : "N:N"
+PMS_PROJECT_CODE ||--O| CHMM_CODE_INFO : "N:N"
+PMS_PROJECT_CODE ||--O| PMS_PROJECT : "N:N"
+PMS_QUESTION ||--O| PMS_USER : "N:N"
+PMS_QUESTION ||--O| PMS_MENU : "N:N"
+PMS_QUESTION ||--O| PMS_PROJECT : "N:N"
+PMS_ROLE ||--O| PMS_CODE : "N:N"
+PMS_ROLE ||--O| PMS_USER : "N:N"
+PMS_SPECIAL_DEPARTMENT ||--O| PMS_USER : "N:N"
+PMS_SPECIAL_DEPARTMENT ||--O| PMS_CODE : "N:N"
+
+PMS_PROJECT_CODE ||--O{ PMS_USER : "N:N"
+PMS_PROJECT_CODE ||--O{ CHMM_CODE_INFO : "N:N"
+PMS_PROJECT_CODE ||--O{ PMS_PROJECT : "N:N"
+PMS_QUESTION ||--O{ PMS_USER : "N:N"
+PMS_QUESTION ||--O{ PMS_MENU : "N:N"
+PMS_QUESTION ||--O{ PMS_PROJECT : "N:N"
+PMS_ROLE ||--O{ PMS_CODE : "N:N"
+PMS_ROLE ||--O{ PMS_USER : "N:N"
+PMS_SPECIAL_DEPARTMENT ||--O{ PMS_USER : "N:N"
+PMS_SPECIAL_DEPARTMENT ||--O{ PMS_CODE : "N:N"
+
+PMS_USER ||--O{ PMS_PROJECT_CODE : "N:N"
+CHMM_CODE_INFO ||--O{ PMS_PROJECT_CODE : "N:N"
+PMS_PROJECT ||--O{ PMS_PROJECT_CODE : "N:N"
+PMS_USER ||--O{ PMS_QUESTION : "N:N"
+PMS_MENU ||--O{ PMS_QUESTION : "N:N"
+PMS_PROJECT ||--O{ PMS_QUESTION : "N:N"
+PMS_CODE ||--O{ PMS_ROLE : "N:N"
+PMS_USER ||--O{ PMS_ROLE : "N:N"
+PMS_USER ||--O{ PMS_SPECIAL_DEPARTMENT : "N:N"
+PMS_CODE ||--O{ PMS_SPECIAL_DEPARTMENT : "N:N"
+
+PMS_PROJECT_CODE }|--|{ PMS_USER : "N:N"
+PMS_PROJECT_CODE }|--|{ CHMM_CODE_INFO : "N:N"
+PMS_PROJECT_CODE }|--|{ PMS_PROJECT : "N:N"
+PMS_QUESTION }|--|{ PMS_USER : "N:N"
+PMS_QUESTION }|--|{ PMS_MENU : "N:N"
+PMS_QUESTION }|--|{ PMS_PROJECT : "N:N"
+PMS_ROLE }|--|{ PMS_CODE : "N:N"
+PMS_ROLE }|--|{ PMS_USER : "N:N"
+PMS_SPECIAL_DEPARTMENT }|--|{ PMS_USER : "N:N"
+PMS_SPECIAL_DEPARTMENT }|--|{ PMS_CODE : "N:N"
+
+PMS_TASK ||--|| PMS_PROJECT : "N:N"
+PMS_TASK ||--|| PMS_CODE : "N:N"
+PMS_TASK ||--|| PMS_USER : "N:N"
+PMS_TEMPLATE ||--|| PMS_USER : "N:N"
+PMS_TEMPLATE ||--|| PMS_CODE : "N:N"
+PMS_USER_GROUP_MAP ||--|| PMS_GROUP : "N:N"
+PMS_USER_GROUP_MAP ||--|| PMS_USER_PROJECT_MAP : "N:N"
+PMS_USER_GROUP_ROLE_MAP ||--|| PMS_GROUP : "N:N"
+PMS_USER_GROUP_ROLE_MAP ||--|| PMS_PROJECT : "N:N"
+PMS_USER_GROUP_ROLE_MAP ||--|| PMS_USER : "N:N"
+
+PMS_PROJECT ||--O{ PMS_TASK : "N:N"
+PMS_CODE ||--O{ PMS_TASK : "N:N"
+PMS_USER ||--O{ PMS_TASK : "N:N"
+PMS_USER ||--O{ PMS_TEMPLATE : "N:N"
+PMS_CODE ||--O{ PMS_TEMPLATE : "N:N"
+PMS_GROUP ||--O{ PMS_USER_GROUP_MAP : "N:N"
+PMS_USER_PROJECT_MAP ||--O{ PMS_USER_GROUP_MAP : "N:N"
+PMS_GROUP ||--O{ PMS_USER_GROUP_ROLE_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_USER_GROUP_ROLE_MAP : "N:N"
+PMS_USER ||--O{ PMS_USER_GROUP_ROLE_MAP : "N:N"
+
+
+
+
+
+
+
+
+
+
+
+
+
+PMS_ROLE ||--O| PMS_USER_GROUP_ROLE_MAP : "N:N"
+
+PMS_USER ||--O{ PMS_PROJECT_CODE : "N:N"
+CHMM_CODE_INFO ||--O{ PMS_PROJECT_CODE : "N:N"
+PMS_PROJECT ||--O{ PMS_PROJECT_CODE : "N:N"
+PMS_USER ||--O{ PMS_QUESTION : "N:N"
+PMS_MENU ||--O{ PMS_QUESTION : "N:N"
+PMS_PROJECT ||--O{ PMS_QUESTION : "N:N"
+PMS_CODE ||--O{ PMS_ROLE : "N:N"
+PMS_USER ||--O{ PMS_ROLE : "N:N"
+PMS_USER ||--O{ PMS_SPECIAL_DEPARTMENT : "N:N"
+PMS_CODE ||--O{ PMS_SPECIAL_DEPARTMENT : "N:N"
+
+
+
+PMS_ROLE ||--O| PMS_USER_GROUP_ROLE_MAP : "N:N"
+
+PMS_TASK ||--|| PMS_PROJECT : "N:N"
+PMS_TASK ||--|| PMS_CODE : "N:N"
+PMS_TASK ||--|| PMS_USER : "N:N"
+PMS_TEMPLATE ||--|| PMS_USER : "N:N"
+PMS_TEMPLATE ||--|| PMS_CODE : "N:N"
+PMS_USER_GROUP_MAP ||--|| PMS_GROUP : "N:N"
+PMS_USER_GROUP_MAP ||--|| PMS_USER_PROJECT_MAP : "N:N"
+PMS_USER_GROUP_ROLE_MAP ||--|| PMS_GROUP : "N:N"
+PMS_USER_GROUP_ROLE_MAP ||--|| PMS_PROJECT : "N:N"
+PMS_USER_GROUP_ROLE_MAP ||--|| PMS_USER : "N:N"
+
+PMS_PROJECT ||--O{ PMS_TASK : "N:N"
+PMS_CODE ||--O{ PMS_TASK : "N:N"
+PMS_USER ||--O{ PMS_TASK : "N:N"
+PMS_USER ||--O{ PMS_TEMPLATE : "N:N"
+PMS_CODE ||--O{ PMS_TEMPLATE : "N:N"
+PMS_GROUP ||--O{ PMS_USER_GROUP_MAP : "N:N"
+PMS_USER_PROJECT_MAP ||--O{ PMS_USER_GROUP_MAP : "N:N"
+PMS_GROUP ||--O{ PMS_USER_GROUP_ROLE_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_USER_GROUP_ROLE_MAP : "N:N"
+PMS_USER ||--O{ PMS_USER_GROUP_ROLE_MAP : "N:N"
+
+PMS_PROJECT_CODE ||--O{ PMS_USER : "N:N"
+PMS_PROJECT_CODE ||--O{ CHMM_CODE_INFO : "N:N"
+PMS_PROJECT_CODE ||--O{ PMS_PROJECT : "N:N"
+PMS_QUESTION ||--O{ PMS_USER : "N:N"
+PMS_QUESTION ||--O{ PMS_MENU : "N:N"
+PMS_QUESTION ||--O{ PMS_PROJECT : "N:N"
+PMS_ROLE ||--O{ PMS_CODE : "N:N"
+PMS_ROLE ||--O{ PMS_USER : "N:N"
+PMS_SPECIAL_DEPARTMENT ||--O{ PMS_USER : "N:N"
+PMS_SPECIAL_DEPARTMENT ||--O{ PMS_CODE : "N:N"
+
+PMS_PROJECT ||--O{ PMS_TASK : "N:N"
+PMS_CODE ||--O{ PMS_TASK : "N:N"
+PMS_USER ||--O{ PMS_TASK : "N:N"
+PMS_USER ||--O{ PMS_TEMPLATE : "N:N"
+PMS_CODE ||--O{ PMS_TEMPLATE : "N:N"
+PMS_GROUP ||--O{ PMS_USER_GROUP_MAP : "N:N"
+PMS_USER_PROJECT_MAP ||--O{ PMS_USER_GROUP_MAP : "N:N"
+PMS_GROUP ||--O{ PMS_USER_GROUP_ROLE_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_USER_GROUP_ROLE_MAP : "N:N"
+PMS_USER ||--O{ PMS_USER_GROUP_ROLE_MAP : "N:N"
+
+PMS_PROJECT ||--O| PMS_TASK : "N:N"
+PMS_CODE ||--O| PMS_TASK : "N:N"
+PMS_USER ||--O| PMS_TASK : "N:N"
+PMS_USER ||--O| PMS_TEMPLATE : "N:N"
+PMS_CODE ||--O| PMS_TEMPLATE : "N:N"
+PMS_GROUP ||--O| PMS_USER_GROUP_MAP : "N:N"
+PMS_USER_PROJECT_MAP ||--O| PMS_USER_GROUP_MAP : "N:N"
+PMS_GROUP ||--O| PMS_USER_GROUP_ROLE_MAP : "N:N"
+PMS_PROJECT ||--O| PMS_USER_GROUP_ROLE_MAP : "N:N"
+PMS_USER ||--O| PMS_USER_GROUP_ROLE_MAP : "N:N"
+
+
+
+PMS_USER_GROUP_ROLE_MAP }O--|| PMS_ROLE : "N:N"
+
+PMS_USER_GROUP_ROLE_MAP }O--|| PMS_ROLE : "N:N"
+
+
+
+PMS_USER_GROUP_ROLE_MAP }O--|| PMS_ROLE : "N:N"
+
+PMS_TASK ||--|| PMS_PROJECT : "N:N"
+PMS_TASK ||--|| PMS_CODE : "N:N"
+PMS_TASK ||--|| PMS_USER : "N:N"
+PMS_TEMPLATE ||--|| PMS_USER : "N:N"
+PMS_TEMPLATE ||--|| PMS_CODE : "N:N"
+PMS_USER_GROUP_MAP ||--|| PMS_GROUP : "N:N"
+PMS_USER_GROUP_MAP ||--|| PMS_USER_PROJECT_MAP : "N:N"
+PMS_USER_GROUP_ROLE_MAP ||--|| PMS_GROUP : "N:N"
+PMS_USER_GROUP_ROLE_MAP ||--|| PMS_PROJECT : "N:N"
+PMS_USER_GROUP_ROLE_MAP ||--|| PMS_USER : "N:N"
+
+PMS_USER ||--O{ PMS_MESSAGE : "N:N"
+PMS_USER ||--O{ PMS_PROJECT : "N:N"
+PMS_USER ||--O{ PMS_MESSAGE_RECIPIENT_MAP : "N:N"
+PMS_MESSAGE ||--O{ PMS_PROJECT : "N:N"
+PMS_MESSAGE ||--O{ PMS_MESSAGE_RECIPIENT_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_CODE : "N:N"
+PMS_PROJECT ||--O{ PMS_COMPANY_REGISTRATION_MANAGEMENT : "N:N"
+PMS_PROJECT ||--O{ PMS_DEPARTMENT : "N:N"
+PMS_MESSAGE_RECIPIENT_MAP ||--O{ PMS_PROJECT : "N:N"
+PMS_PROJECT_CODE ||--O{ PMS_CODE : "N:N"
+
+
+
+
+
+PMS_USER_GROUP_ROLE_MAP }O--|| PMS_ROLE : "N:N"
+
+PMS_USER_GROUP_ROLE_MAP }O--|| PMS_ROLE : "N:N"
+
+PMS_PROJECT_CODE ||--O| PMS_USER : "N:N"
+PMS_PROJECT_CODE ||--O| CHMM_CODE_INFO : "N:N"
+PMS_PROJECT_CODE ||--O| PMS_PROJECT : "N:N"
+PMS_QUESTION ||--O| PMS_USER : "N:N"
+PMS_QUESTION ||--O| PMS_MENU : "N:N"
+PMS_QUESTION ||--O| PMS_PROJECT : "N:N"
+PMS_ROLE ||--O| PMS_CODE : "N:N"
+PMS_ROLE ||--O| PMS_USER : "N:N"
+PMS_SPECIAL_DEPARTMENT ||--O| PMS_USER : "N:N"
+PMS_SPECIAL_DEPARTMENT ||--O| PMS_CODE : "N:N"
+
+PMS_ROLE ||--O| PMS_USER_GROUP_ROLE_MAP : "N:N"
+
+PMS_PROJECT_CODE ||--O| PMS_USER : "N:N"
+PMS_PROJECT_CODE ||--O| CHMM_CODE_INFO : "N:N"
+PMS_PROJECT_CODE ||--O| PMS_PROJECT : "N:N"
+PMS_QUESTION ||--O| PMS_USER : "N:N"
+PMS_QUESTION ||--O| PMS_MENU : "N:N"
+PMS_QUESTION ||--O| PMS_PROJECT : "N:N"
+PMS_ROLE ||--O| PMS_CODE : "N:N"
+PMS_ROLE ||--O| PMS_USER : "N:N"
+PMS_SPECIAL_DEPARTMENT ||--O| PMS_USER : "N:N"
+PMS_SPECIAL_DEPARTMENT ||--O| PMS_CODE : "N:N"
+
+PMS_PROJECT ||--O{ PMS_TASK : "N:N"
+PMS_CODE ||--O{ PMS_TASK : "N:N"
+PMS_USER ||--O{ PMS_TASK : "N:N"
+PMS_USER ||--O{ PMS_TEMPLATE : "N:N"
+PMS_CODE ||--O{ PMS_TEMPLATE : "N:N"
+PMS_GROUP ||--O{ PMS_USER_GROUP_MAP : "N:N"
+PMS_USER_PROJECT_MAP ||--O{ PMS_USER_GROUP_MAP : "N:N"
+PMS_GROUP ||--O{ PMS_USER_GROUP_ROLE_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_USER_GROUP_ROLE_MAP : "N:N"
+PMS_USER ||--O{ PMS_USER_GROUP_ROLE_MAP : "N:N"
+
+PMS_PROJECT ||--O{ PMS_TASK : "N:N"
+PMS_CODE ||--O{ PMS_TASK : "N:N"
+PMS_USER ||--O{ PMS_TASK : "N:N"
+PMS_USER ||--O{ PMS_TEMPLATE : "N:N"
+PMS_CODE ||--O{ PMS_TEMPLATE : "N:N"
+PMS_GROUP ||--O{ PMS_USER_GROUP_MAP : "N:N"
+PMS_USER_PROJECT_MAP ||--O{ PMS_USER_GROUP_MAP : "N:N"
+PMS_GROUP ||--O{ PMS_USER_GROUP_ROLE_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_USER_GROUP_ROLE_MAP : "N:N"
+PMS_USER ||--O{ PMS_USER_GROUP_ROLE_MAP : "N:N"
+
+PMS_PROJECT ||--O{ PMS_TASK : "N:N"
+PMS_CODE ||--O{ PMS_TASK : "N:N"
+PMS_USER ||--O{ PMS_TASK : "N:N"
+PMS_USER ||--O{ PMS_TEMPLATE : "N:N"
+PMS_CODE ||--O{ PMS_TEMPLATE : "N:N"
+PMS_GROUP ||--O{ PMS_USER_GROUP_MAP : "N:N"
+PMS_USER_PROJECT_MAP ||--O{ PMS_USER_GROUP_MAP : "N:N"
+PMS_GROUP ||--O{ PMS_USER_GROUP_ROLE_MAP : "N:N"
+PMS_PROJECT ||--O{ PMS_USER_GROUP_ROLE_MAP : "N:N"
+PMS_USER ||--O{ PMS_USER_GROUP_ROLE_MAP : "N:N"
+
+PMS_USER_GROUP_ROLE_MAP }O--|| PMS_ROLE : "N:N"
+
+
+
+
+
+
+CHMM_CATEGORY_INFO {
+        CATEGORY_ID varchar(255) PK
+        CATEGORY_DESC varchar(1000)
+        ORDER_NUM int
+        USE_YN varchar(1)
+        SYS_INSERT_DTM datetime
+        SYS_INSERT_USER_ID varchar(255)
+        SYS_UPDATE_DTM datetime
+        SYS_UPDATE_USER_ID varchar(255)
+        REAL_VALUE varchar(100)
+        is_delete tinyint(1)
+        service_code varchar(255)
+    }
+
+CHMM_CODE_INFO {
+        CATEGORY_ID varchar(255) PK
+        CODE_ID varchar(255) PK
+        CODE_DESC varchar(1000)
+        ORDER_NUM int
+        USE_YN varchar(1)
+        SYS_INSERT_DTM datetime
+        SYS_INSERT_USER_ID varchar(255)
+        SYS_UPDATE_DTM datetime
+        SYS_UPDATE_USER_ID varchar(255)
+        REAL_VALUE varchar(100)
+        is_delete tinyint(1)
+    }
+
+CHMM_CODE_ITEM_INFO {
+        CATEGORY_ID varchar(255) PK
+        CODE_ID varchar(255) PK
+        CODE_ITEM_ID varchar(255) PK
+        CODE_ITEM_DESC varchar(1000)
+        ORDER_NUM int
+        USE_YN varchar(1)
+        SYS_INSERT_DTM datetime
+        SYS_INSERT_USER_ID varchar(255)
+        SYS_UPDATE_DTM datetime
+        SYS_UPDATE_USER_ID varchar(255)
+        REAL_VALUE varchar(100)
+        is_delete tinyint(1)
+    }
+
+PMS_ANSWER {
+        bigint seq PK
+        datetime(6) create_date_time
+        datetime(6) update_date_time
+        mediumblob content
+        bit(1) is_use
+        bigint read_count
+        varchar(255) title
+        bigint creator_seq FK
+        bigint updater_seq FK
+        bigint project_menu_seq FK
+        bigint question_seq FK
+    }
+
+PMS_BOARD {
+        bigint seq PK
+        datetime(6) create_date_time
+        datetime(6) update_date_time
+        mediumblob content
+        bit(1) is_use
+        bigint read_count
+        varchar(255) title
+        bigint creator_seq FK
+        bigint updater_seq FK
+        bigint project_menu_seq FK
+    }
+
+PMS_BUTTON {
+        bigint seq PK
+        varchar(255) id
+        varchar(255) code
+        varchar(255) description
+        varchar(255) name
+        bigint is_use_seq FK
+    }
+
+PMS_BUTTON_ROLE_MAP {
+        SEQ BigInt PK
+        CREATE_DATE_TIME DateTime(6)
+        UPDATE_DATE_TIME DateTime(6)
+        IS_MAP Bit(1)
+        CREATOR_SEQ BigInt FK
+        UPDATER_SEQ BigInt FK
+        MENU_BUTTON_SEQ BigInt FK
+        PROJECT_SEQ BigInt FK
+        ROLE_SEQ BigInt FK
+        IS_DEFAULT Bit(1)
+    }
+
+PMS_CODE {
+        bigint seq PK
+        datetime(6) create_date_time
+        datetime(6) update_date_time
+        varchar(255) code
+        bit(1) is_use
+        varchar(255) name
+        varchar(255) real_value
+        varchar(255) service_code
+        bigint creator_seq FK
+        bigint updater_seq FK
+        varchar(255) category_id FK
+        varchar(255) code_id FK
+        varchar(255) code_item_id FK
+    }
+
+PMS_COMPANY_REGISTRATION_MANAGEMENT {
+        SEQ bigint PK
+        CREATE_DATE_TIME datetime(6)
+        UPDATE_DATE_TIME datetime(6)
+        ABBREVIATION varchar(255)
+        ENGLISH_NAME varchar(255)
+        IS_ABBREVIATION_CHANGEABLE bit(1)
+        IS_DELETE bit(1)
+        IS_MOIN_USE bit(1)
+        IS_TENANT bit(1)
+        IS_USAGE_FEE_END bit(1)
+        IS_USE bit(1)
+        MOIN_CODE varchar(255)
+        NAME varchar(255)
+        NOTE varchar(255)
+        CREATOR_SEQ bigint FK
+        UPDATER_SEQ bigint FK
+        CATEGORY_SEQ bigint FK
+        REPRESENTATIVE_SEQ bigint FK
+    }
+
+PMS_DEPARTMENT {
+        DEPT_ID varchar(5) PK
+        CREATE_DATE_TIME datetime(6)
+        IS_USE bit(1)
+        LEVEL varchar(5)
+        NAME varchar(100)
+        SORT int
+        TYPE varchar(5)
+        UPDATE_DATE_TIME datetime(6)
+        PARENT_DEPARTMENT_DEPT_ID varchar(5) FK
+        CREATOR_SEQ bigint FK
+        UPDATER_SEQ bigint FK
+    }
+
+PMS_DESIGN {
+        bigint seq PK
+        datetime(6) create_date_time
+        varchar(80) output
+        datetime(6) plan_end_date
+        datetime(6) plan_start_date
+        datetime(6) real_end_date
+        datetime(6) real_start_date
+        varchar(30) status
+        datetime(6) update_datetime
+    }
+
+PMS_EXPORT_MANAGEMENT {
+        bigint seq PK
+        datetime(6) create_date_time
+        datetime(6) update_date_time
+        varchar(255) type
+        bigint creator_seq FK
+        bigint updater_seq FK
+        bigint project_seq FK
+    }
+
+PMS_GROUP {
+        SEQ BigInt PK
+        CREATE_DATE_TIME DateTime(6)
+        UPDATE_DATE_TIME DateTime(6)
+        DESCRIPTION Varchar(255)
+        NAME Varchar(255)
+        CREATOR_SEQ BigInt FK
+        UPDATER_SEQ BigInt FK
+        IS_USE_SEQ BigInt FK
+        PROJECT_SEQ BigInt FK
+        IS_DEFAULT Bit(1)
+        GROUP_ID Varchar(255)
+    }

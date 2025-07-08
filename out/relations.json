@@ -1,0 +1,357 @@
+[
+  {
+    "child_table": "chmm_code_info",
+    "parent_table": "chmm_category_info",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "chmm_code_item_info",
+    "parent_table": "chmm_code_info",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_answer",
+    "parent_table": "pms_user",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_answer",
+    "parent_table": "pms_question",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_answer",
+    "parent_table": "pms_menu",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_board",
+    "parent_table": "pms_user",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_board",
+    "parent_table": "pms_menu",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_button",
+    "parent_table": "pms_code",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_button_role_map",
+    "parent_table": "pms_menu_button_map",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_button_role_map",
+    "parent_table": "pms_user",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_button_role_map",
+    "parent_table": "pms_role",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_button_role_map",
+    "parent_table": "pms_project",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_code",
+    "parent_table": "pms_user",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_code",
+    "parent_table": "chmm_code_item_info",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_company_registration_management",
+    "parent_table": "pms_user",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_company_registration_management",
+    "parent_table": "pms_code",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_department",
+    "parent_table": "pms_user",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_department",
+    "parent_table": "pms_department",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_export_management",
+    "parent_table": "pms_project",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_export_management",
+    "parent_table": "pms_user",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_group",
+    "parent_table": "pms_user",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_group",
+    "parent_table": "pms_code",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_group",
+    "parent_table": "pms_project",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_group_pms_user_group_map",
+    "parent_table": "pms_user_group_map",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_group_pms_user_group_map",
+    "parent_table": "pms_group",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_input_person",
+    "parent_table": "pms_project",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_input_person",
+    "parent_table": "pms_code",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_input_person",
+    "parent_table": "pms_input_person",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_input_person",
+    "parent_table": "pms_user",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_menu",
+    "parent_table": "pms_project",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_menu",
+    "parent_table": "pms_user",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_menu",
+    "parent_table": "pms_menu",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_menu",
+    "parent_table": "pms_code",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_menu_button_map",
+    "parent_table": "pms_menu",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_menu_button_map",
+    "parent_table": "pms_button",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_menu_button_map",
+    "parent_table": "pms_project",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_menu_role_map",
+    "parent_table": "pms_menu",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_menu_role_map",
+    "parent_table": "pms_user",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_menu_role_map",
+    "parent_table": "pms_role",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_menu_role_map",
+    "parent_table": "pms_project",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_message",
+    "parent_table": "pms_user",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_message",
+    "parent_table": "pms_project",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_message_recipient_map",
+    "parent_table": "pms_message",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_message_recipient_map",
+    "parent_table": "pms_project",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_message_recipient_map",
+    "parent_table": "pms_user",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_project",
+    "parent_table": "pms_user",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_project",
+    "parent_table": "pms_code",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_project",
+    "parent_table": "pms_company_registration_management",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_project",
+    "parent_table": "pms_department",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_project_code",
+    "parent_table": "pms_code",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_project_code",
+    "parent_table": "pms_user",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_project_code",
+    "parent_table": "chmm_code_info",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_project_code",
+    "parent_table": "pms_project",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_question",
+    "parent_table": "pms_user",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_question",
+    "parent_table": "pms_menu",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_question",
+    "parent_table": "pms_project",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_role",
+    "parent_table": "pms_code",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_role",
+    "parent_table": "pms_user",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_special_department",
+    "parent_table": "pms_user",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_special_department",
+    "parent_table": "pms_code",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_task",
+    "parent_table": "pms_project",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_task",
+    "parent_table": "pms_code",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_task",
+    "parent_table": "pms_user",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_template",
+    "parent_table": "pms_user",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_template",
+    "parent_table": "pms_code",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_user_group_map",
+    "parent_table": "pms_group",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_user_group_map",
+    "parent_table": "pms_user_project_map",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_user_group_role_map",
+    "parent_table": "pms_group",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_user_group_role_map",
+    "parent_table": "pms_project",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_user_group_role_map",
+    "parent_table": "pms_user",
+    "relationship_type": "N:N"
+  },
+  {
+    "child_table": "pms_user_group_role_map",
+    "parent_table": "pms_role",
+    "relationship_type": "N:N"
+  }
+]
