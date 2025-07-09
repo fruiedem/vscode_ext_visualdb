@@ -10,31 +10,6 @@
     "relationship_type": "N:N"
   },
   {
-    "child_table": "pms_answer",
-    "parent_table": "pms_user",
-    "relationship_type": "N:N"
-  },
-  {
-    "child_table": "pms_answer",
-    "parent_table": "pms_question",
-    "relationship_type": "N:N"
-  },
-  {
-    "child_table": "pms_answer",
-    "parent_table": "pms_menu",
-    "relationship_type": "N:N"
-  },
-  {
-    "child_table": "pms_board",
-    "parent_table": "pms_user",
-    "relationship_type": "N:N"
-  },
-  {
-    "child_table": "pms_board",
-    "parent_table": "pms_menu",
-    "relationship_type": "N:N"
-  },
-  {
     "child_table": "pms_button",
     "parent_table": "pms_code",
     "relationship_type": "N:N"
@@ -125,26 +100,6 @@
     "relationship_type": "N:N"
   },
   {
-    "child_table": "pms_input_person",
-    "parent_table": "pms_project",
-    "relationship_type": "N:N"
-  },
-  {
-    "child_table": "pms_input_person",
-    "parent_table": "pms_code",
-    "relationship_type": "N:N"
-  },
-  {
-    "child_table": "pms_input_person",
-    "parent_table": "pms_input_person",
-    "relationship_type": "N:N"
-  },
-  {
-    "child_table": "pms_input_person",
-    "parent_table": "pms_user",
-    "relationship_type": "N:N"
-  },
-  {
     "child_table": "pms_menu",
     "parent_table": "pms_project",
     "relationship_type": "N:N"
@@ -197,31 +152,6 @@
   {
     "child_table": "pms_menu_role_map",
     "parent_table": "pms_project",
-    "relationship_type": "N:N"
-  },
-  {
-    "child_table": "pms_message",
-    "parent_table": "pms_user",
-    "relationship_type": "N:N"
-  },
-  {
-    "child_table": "pms_message",
-    "parent_table": "pms_project",
-    "relationship_type": "N:N"
-  },
-  {
-    "child_table": "pms_message_recipient_map",
-    "parent_table": "pms_message",
-    "relationship_type": "N:N"
-  },
-  {
-    "child_table": "pms_message_recipient_map",
-    "parent_table": "pms_project",
-    "relationship_type": "N:N"
-  },
-  {
-    "child_table": "pms_message_recipient_map",
-    "parent_table": "pms_user",
     "relationship_type": "N:N"
   },
   {

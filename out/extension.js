@@ -447,9 +447,9 @@ async function fetchAllTablesInfo(schemaName) {
                     console.log(`Info for table "${tableName}":`, tableInfo);
                     vscode.window.showInformationMessage(`Info for table "${tableName}": ${JSON.stringify(tableInfo)}`);
                     // 5.테이블 정보 mermaid 코드 변환
-                    const tableInfoString = `${tableName}: ${JSON.stringify(tableInfo)}`;
-                    await vscode.commands.executeCommand('visualdbforpms.changeMermaid', tableInfoString);
-                    await vscode.commands.executeCommand('visualdbforpms.getRelationInfo');
+                    // const tableInfoString = `${tableName}: ${JSON.stringify(tableInfo)}`;
+                    //await vscode.commands.executeCommand('visualdbforpms.changeMermaid', tableInfoString);
+                    //await vscode.commands.executeCommand('visualdbforpms.getRelationInfo');
                     return { tableName, tableInfo };
                 }
                 catch (error) {
@@ -476,15 +476,15 @@ async function fetchAllTablesInfo(schemaName) {
             console.log('Saving table name to OriginSchemas:', result.tableName);
             // 파일에 테이블 이름 저장
             await saveOriginSchemasToFile(result.tableName);
-            console.log('Saving table info to OriginSchemas:', result.tableInfo);
+            // console.log('Saving table info to OriginSchemas:', result.tableInfo);
             // 파일에 테이블 정보 저장 (+ 문자 제거)
             const cleanedTableInfo = removePlusSigns(JSON.stringify(result.tableInfo));
-            await saveOriginSchemasToFile(cleanedTableInfo);
-            fs.appendFileSync(filePath, '\n', 'utf8');
+            // await saveOriginSchemasToFile(cleanedTableInfo);
             // 4. mermaid 코드 변환 (순차 처리로 충돌 방지) (+ 문자 제거)
             const tableInfoString = `${result.tableName}: ${cleanedTableInfo}`;
             await vscode.commands.executeCommand('visualdbforpms.changeMermaid', tableInfoString);
         }
+        await vscode.commands.executeCommand('visualdbforpms.getRelationInfo');
         console.log('File writing process completed.');
     }
     catch (error) {
@@ -1312,9 +1312,11 @@ function getHtmlForWebviewSchema(schema, modelCamelSnake, modelAIresMap, mermaid
         }
         .container {
           width: 100%;
-          height: 100%;
+          height: 100vh;
           padding: 20px;
-          overflow-y: auto;
+          overflow: auto;
+          background: #fafafa;
+          position: relative;
         }
         .mermaid {
           margin-bottom: 20px;
@@ -1322,6 +1324,40 @@ function getHtmlForWebviewSchema(schema, modelCamelSnake, modelAIresMap, mermaid
           border: 1px solid #ddd;
           border-radius: 8px;
           background: #f9f9f9;
+          overflow: auto;
+          min-width: 100%;
+          min-height: 200px;
+        }
+        /* 대용량 다이어그램을 위한 스타일 */
+        .mermaid svg {
+          min-width: 100%;
+          min-height: 200px;
+          width: auto;
+          height: auto;
+        }
+        /* 텍스트 크기 경고 메시지 숨기기 */
+        .mermaid .error-text {
+          display: none !important;
+        }
+        /* 스크롤바 스타일링 */
+        .container::-webkit-scrollbar,
+        .mermaid::-webkit-scrollbar {
+          width: 12px;
+          height: 12px;
+        }
+        .container::-webkit-scrollbar-track,
+        .mermaid::-webkit-scrollbar-track {
+          background: #f1f1f1;
+          border-radius: 6px;
+        }
+        .container::-webkit-scrollbar-thumb,
+        .mermaid::-webkit-scrollbar-thumb {
+          background: #c1c1c1;
+          border-radius: 6px;
+        }
+        .container::-webkit-scrollbar-thumb:hover,
+        .mermaid::-webkit-scrollbar-thumb:hover {
+          background: #a8a8a8;
         }
         .mermaid-file-section {
           margin-top: 30px;
@@ -1348,6 +1384,27 @@ function getHtmlForWebviewSchema(schema, modelCamelSnake, modelAIresMap, mermaid
           					mermaid.initialize({
 						startOnLoad: true,
 						securityLevel: 'loose', // Strict Mode 비활성화
+						er: {
+							// ER 다이어그램 설정
+							useMaxWidth: true,
+							diagramPadding: 8,
+							layoutDirection: 'TB',
+							minEntityWidth: 100,
+							minEntityHeight: 75,
+							entityPadding: 15,
+							stroke: 'gray',
+							fill: 'honeydew',
+							fontSize: 12
+						},
+						// 텍스트 크기 제한 최대값으로 설정
+						maxTextSize: 999999999,
+						// 다이어그램 크기 제한 최대값으로 설정
+						maxWidth: 999999999,
+						maxHeight: 999999999,
+						// 폰트 크기 조정
+						fontSize: 12,
+						// 로그 레벨 설정
+						logLevel: 1
 					});
 				</script>
 
@@ -1381,6 +1438,101 @@ function getHtmlForWebviewSchema(schema, modelCamelSnake, modelAIresMap, mermaid
               console.log('erorrororor')
               console.error("No <div class='mermaid'> element found in the DOM.");
             }
+            
+            // 줌 기능을 위한 변수들
+            let currentZoom = 1;
+            const minZoom = 0.1;
+            const maxZoom = 5;
+            const zoomStep = 0.1;
+            
+            // 줌 기능 함수
+            function applyZoom(zoomDelta, mouseX, mouseY) {
+              const newZoom = Math.max(minZoom, Math.min(maxZoom, currentZoom + zoomDelta));
+              if (newZoom !== currentZoom) {
+                const oldZoom = currentZoom;
+                currentZoom = newZoom;
+                
+                // 컨테이너의 현재 스크롤 위치 저장
+                const scrollLeft = mermaidContainer.scrollLeft;
+                const scrollTop = mermaidContainer.scrollTop;
+                
+                // 마우스 위치를 컨테이너 기준으로 계산
+                const containerRect = mermaidContainer.getBoundingClientRect();
+                const mouseXRelative = mouseX - containerRect.left + scrollLeft;
+                const mouseYRelative = mouseY - containerRect.top + scrollTop;
+                
+                // 모든 mermaid 요소에 줌 적용
+                const mermaidElements = mermaidContainer.querySelectorAll('.mermaid');
+                mermaidElements.forEach(element => {
+                  const rect = element.getBoundingClientRect();
+                  
+                  // 요소의 현재 위치 계산
+                  const elementLeft = rect.left - containerRect.left + scrollLeft;
+                  const elementTop = rect.top - containerRect.top + scrollTop;
+                  
+                  // 마우스 포인터 기준으로 변환 계산
+                  const scaleX = (mouseXRelative - elementLeft) / oldZoom;
+                  const scaleY = (mouseYRelative - elementTop) / oldZoom;
+                  
+                  const translateX = scaleX * (1 - newZoom / oldZoom);
+                  const translateY = scaleY * (1 - newZoom / oldZoom);
+                  
+                  element.style.transform = \`scale(\${currentZoom}) translate(\${translateX}px, \${translateY}px)\`;
+                  element.style.transformOrigin = '0 0';
+                  element.style.transition = 'transform 0.1s ease';
+                });
+                
+                // 줌 레벨 표시
+                updateZoomDisplay();
+              }
+            }
+            
+            // 줌 레벨 표시 함수
+            function updateZoomDisplay() {
+              let zoomDisplay = document.getElementById('zoom-display');
+              if (!zoomDisplay) {
+                zoomDisplay = document.createElement('div');
+                zoomDisplay.id = 'zoom-display';
+                zoomDisplay.style.cssText = \`
+                  position: fixed;
+                  top: 10px;
+                  right: 10px;
+                  background: rgba(0, 0, 0, 0.7);
+                  color: white;
+                  padding: 5px 10px;
+                  border-radius: 5px;
+                  font-size: 12px;
+                  z-index: 1000;
+                  pointer-events: none;
+                \`;
+                document.body.appendChild(zoomDisplay);
+              }
+              zoomDisplay.textContent = \`Zoom: \${Math.round(currentZoom * 100)}%\`;
+            }
+            
+            // 마우스 휠 이벤트 리스너
+            mermaidContainer.addEventListener('wheel', (e) => {
+              // Ctrl 키와 함께 휠을 사용할 때만 줌 적용하고 기본 스크롤 방지
+              if (e.ctrlKey) {
+                e.preventDefault();
+                const zoomDelta = e.deltaY > 0 ? -zoomStep : zoomStep;
+                applyZoom(zoomDelta, e.clientX, e.clientY);
+              }
+              // Ctrl 키 없이 휠 사용 시에는 기본 스크롤 동작 허용
+            }, { passive: false });
+            
+            // 줌 리셋 기능 (더블클릭)
+            mermaidContainer.addEventListener('dblclick', (e) => {
+              if (e.target.classList.contains('mermaid') || e.target.closest('.mermaid')) {
+                currentZoom = 1;
+                const mermaidElements = mermaidContainer.querySelectorAll('.mermaid');
+                mermaidElements.forEach(element => {
+                  element.style.transform = 'scale(1) translate(0px, 0px)';
+                });
+                updateZoomDisplay();
+              }
+            });
+            
             const modelRegex = /erDiagram\s+([\w_]+)\s*{/g; // 'model' 키워드 뒤의 단어를 캡처
 
             // 기존 스키마 다이어그램 추가
@@ -1410,6 +1562,9 @@ function getHtmlForWebviewSchema(schema, modelCamelSnake, modelAIresMap, mermaid
               mermaidContainer.appendChild(diagramDiv);
               console.log('Added mermaid content:', mermaidContent.trim());
             }
+            
+            // 초기 줌 레벨 표시
+            updateZoomDisplay();
 
             // 팝업 관련 요소
           const popupOverlay = document.getElementById('popup-overlay');
